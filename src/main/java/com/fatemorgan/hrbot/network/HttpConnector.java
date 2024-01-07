@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.network;
 
+import com.fatemorgan.hrbot.config.TelegramConfig;
 import com.fatemorgan.hrbot.model.exceptions.NetworkException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -9,22 +10,20 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class HttpConnector implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnector.class);
     private CloseableHttpClient client;
-    @Value("${bot.api.host}")
     private String host;
-    @Value("${bot.token}")
     private String token;
 
-    public HttpConnector(){
+    public HttpConnector(TelegramConfig config){
+        this.host = config.getUrl();
+        this.token = config.getBotToken();
         this.client = HttpClients.createDefault();
     }
 
@@ -32,7 +31,7 @@ public class HttpConnector implements AutoCloseable {
         if (path == null) throw new NetworkException("No path specified for GET method");
         if (parameters == null) parameters = "";
 
-        String requestString = String.format("%s%s%s?%s", host, token, path, URLEncoder.encode(parameters, "UTF-8"));
+        String requestString = String.format("%s%s%s?%s", host, token, path, parameters, "UTF-8");
         HttpGet get = new HttpGet(requestString);
 
         try (CloseableHttpResponse response = client.execute(get)){

@@ -3,16 +3,13 @@ package com.fatemorgan.hrbot.controllers;
 import com.fatemorgan.hrbot.handlers.HRBot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalTime;
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/message")
+@RequestMapping("/api/v1/message")
 public class MessageController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageController.class);
 
@@ -22,11 +19,11 @@ public class MessageController {
         this.bot = bot;
     }
 
-    @GetMapping
-    public void message(){
+    @GetMapping(path = "/send")
+    public void message(@RequestParam(value = "text", defaultValue = "") String text){
         try {
-            String message = String.format("Message: %s - %s", LocalTime.now(), UUID.randomUUID());
-            bot.sendMessage(message);
+            String response = bot.sendMessage(text);
+            if (response != null) LOGGER.info(response);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
         }
