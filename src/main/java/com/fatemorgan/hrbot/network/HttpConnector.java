@@ -2,15 +2,20 @@ package com.fatemorgan.hrbot.network;
 
 import com.fatemorgan.hrbot.config.TelegramConfig;
 import com.fatemorgan.hrbot.model.exceptions.NetworkException;
+import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -27,14 +32,33 @@ public class HttpConnector implements AutoCloseable {
         this.client = HttpClients.createDefault();
     }
 
-    public String get(String path, String parameters) throws UnsupportedEncodingException, NetworkException {
-        if (path == null) throw new NetworkException("No path specified for GET method");
-        if (parameters == null) parameters = "";
+    public String get(String path) throws NetworkException {
+        return get(path, null);
+    }
 
-        String requestString = String.format("%s%s%s?%s", host, token, path, parameters, "UTF-8");
+    public String get(String path, String parameters) throws NetworkException {
+        String requestString = buildRequestUrl(path, parameters);
+
         HttpGet get = new HttpGet(requestString);
 
-        try (CloseableHttpResponse response = client.execute(get)){
+        return handleRequest(get, requestString);
+    }
+
+    public String post(String path, String parameters, String json) throws NetworkException, UnsupportedEncodingException {
+        if (json == null) throw new NetworkException("JSON is null");
+
+        LOGGER.info(json);
+        String requestString = buildRequestUrl(path, parameters);
+
+        HttpPost post = new HttpPost(requestString);
+        post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
+        post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+
+        return handleRequest(post, requestString);
+    }
+
+    private String handleRequest(HttpUriRequest request, String requestString){
+        try (CloseableHttpResponse response = client.execute(request)){
             StatusLine statusLine = response.getStatusLine();
             if (statusLine != null) logErrorOrBypass(statusLine.getStatusCode(), requestString);
             return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -42,6 +66,22 @@ public class HttpConnector implements AutoCloseable {
             LOGGER.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    private String buildRequestUrl(String path, String parameters) throws NetworkException {
+        if (path == null) throw new NetworkException("Request path is null");
+        if (parameters == null) parameters = "";
+
+        String requestString = String.format(
+                "%s%s%s%s%s",
+                host,
+                token,
+                path,
+                parameters.isEmpty() ? "" : "?",
+                parameters
+        );
+
+        return requestString;
     }
 
     private void logErrorOrBypass(int httpStatus, String path){
