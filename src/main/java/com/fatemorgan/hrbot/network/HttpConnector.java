@@ -70,17 +70,7 @@ public class HttpConnector implements AutoCloseable {
 
     private String buildRequestUrl(String path, String parameters) throws NetworkException {
         if (path == null) throw new NetworkException("Request path is null");
-        if (parameters == null) parameters = "";
-
-        String requestString = String.format(
-                "%s%s%s%s%s",
-                host,
-                token,
-                path,
-                parameters.isEmpty() ? "" : "?",
-                parameters
-        );
-
+        String requestString = String.format("%s%s%s?%s", host, token, path, parameters != null ? parameters : "");
         return requestString;
     }
 
