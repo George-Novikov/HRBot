@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 *.yml
 credentials.json
+/tokens
 
 ### STS ###
 .apt_generated
