@@ -22,7 +22,7 @@ public class SheetsController {
     @GetMapping("/test")
     public ResponseEntity test(){
         try {
-            googleSheetsService.getSheetsData(Action.SETTINGS_UPDATE);
+            googleSheetsService.getSheetsData(Action.ALL);
             return ResponseEntity.ok().build();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

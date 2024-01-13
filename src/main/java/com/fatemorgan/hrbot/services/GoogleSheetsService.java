@@ -6,7 +6,7 @@ import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
-import com.fatemorgan.hrbot.model.exceptions.SheetsException;
+import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.google.api.services.sheets.v4.Sheets;
@@ -39,7 +39,7 @@ public class GoogleSheetsService {
         this.extractor = extractor;
     }
 
-    public void getSheetsData(Action action) throws IOException, SheetsException {
+    public void getSheetsData(Action action) throws IOException, SettingsException {
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetID).execute();
 
         List<SheetData> sheets = spreadsheet.getSheets()
@@ -49,9 +49,11 @@ public class GoogleSheetsService {
         fillAllSheetsData(sheets, action);
 
         Settings settings = extractor.getSettings(sheets);
-        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets);
-        EventsSchedule events = extractor.getEvents(sheets);
-        ChatReplies chatReplies = extractor.getChatReplies(sheets);
+        if (settings == null) throw new SettingsException("Failed to load settings from Spreadsheets remote source");
+
+        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets, settings);
+        EventsSchedule events = extractor.getEvents(sheets, settings);
+        ChatReplies chatReplies = extractor.getChatReplies(sheets, settings);
 
         if (settings != null) LOGGER.info(settings.toJson());
     }

@@ -71,7 +71,7 @@ public class SheetData {
     }
 
     public boolean isEmpty(){
-        return this.rows == null;
+        return this.rows == null || this.rows.isEmpty();
     }
 
     public boolean isProcessed(Action action){

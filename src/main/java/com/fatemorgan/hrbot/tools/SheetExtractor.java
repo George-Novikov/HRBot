@@ -9,6 +9,7 @@ import com.fatemorgan.hrbot.model.settings.Settings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.text.DateFormat;
 import java.util.List;
 
 @Component
@@ -24,34 +25,34 @@ public class SheetExtractor {
 
     public Settings getSettings(List<SheetData> sheets){
         SheetData settingsSheet = getSheet(sheets, settingsSheetTitle);
-        return settingsSheet != null && !settingsSheet.isEmpty() ? new Settings(settingsSheet) : null;
+        return isValid(settingsSheet) ? new Settings(settingsSheet, sheets) : null;
     }
 
-    public BirthdaysSchedule getBirthdays(List<SheetData> sheets){
+    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, Settings settings){
         SheetData birthdaysSheet = getSheet(sheets, birthdaysSheetTitle);
-        return birthdaysSheet != null && !birthdaysSheet.isEmpty() ? new BirthdaysSchedule(birthdaysSheet) : null;
+        return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, settings) : null;
     }
 
-    public EventsSchedule getEvents(List<SheetData> sheets){
+    public EventsSchedule getEvents(List<SheetData> sheets, Settings settings){
         SheetData eventsSheet = getSheet(sheets, eventsSheetTitle);
-        return eventsSheet != null && !eventsSheet.isEmpty()? new EventsSchedule(eventsSheet) : null;
+        return isValid(eventsSheet) ? new EventsSchedule(eventsSheet, settings) : null;
     }
 
-    public ChatReplies getChatReplies(List<SheetData> sheets){
+    public ChatReplies getChatReplies(List<SheetData> sheets, Settings settings){
         SheetData chatSheet = getSheet(sheets, chatSheetTitle);
-        return chatSheet != null && !chatSheet.isEmpty() ? new ChatReplies(chatSheet) : null;
+        return isValid(chatSheet) ? new ChatReplies(chatSheet, settings) : null;
     }
 
     public boolean isExtracted(SheetData sheet, Action action){
         switch (action){
             case SETTINGS_UPDATE:
-                return settingsSheetTitle.equals(sheet.getTitle());
+                return isSettingsExtraction(sheet);
             case BIRTHDAYS_UPDATE:
-                return birthdaysSheetTitle.equals(sheet.getTitle());
+                return isBirthdaysExtraction(sheet) || isSettingsExtraction(sheet);
             case EVENTS_UPDATE:
-                return eventsSheetTitle.equals(sheet.getTitle());
+                return isEventsExtraction(sheet) || isSettingsExtraction(sheet);
             case CHAT_UPDATE:
-                return chatSheetTitle.equals(sheet.getTitle());
+                return isChatExtraction(sheet) || isSettingsExtraction(sheet);
             case ALL:
                 return true;
             default:
@@ -65,5 +66,25 @@ public class SheetExtractor {
                 .filter(sheet -> sheet.getTitle().equals(sheetTitle))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private boolean isSettingsExtraction(SheetData sheet){
+        return settingsSheetTitle.equals(sheet.getTitle());
+    }
+
+    private boolean isBirthdaysExtraction(SheetData sheet){
+        return birthdaysSheetTitle.equals(sheet.getTitle());
+    }
+
+    private boolean isEventsExtraction(SheetData sheet){
+        return eventsSheetTitle.equals(sheet.getTitle());
+    }
+
+    private boolean isChatExtraction(SheetData sheet){
+        return chatSheetTitle.equals(sheet.getTitle());
+    }
+
+    private boolean isValid(SheetData sheet){
+        return sheet != null && !sheet.isEmpty();
     }
 }
