@@ -23,32 +23,30 @@ import java.nio.charset.StandardCharsets;
 public class HttpConnector implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnector.class);
     private CloseableHttpClient client;
-    private String host;
-    private String token;
+    private String url;
 
-    public HttpConnector(TelegramConfig config){
-        this.host = config.getUrl();
-        this.token = config.getBotToken();
+    public HttpConnector(String url){
+        this.url = url;
         this.client = HttpClients.createDefault();
     }
 
-    public String get(String path) throws NetworkException {
-        return get(path, null);
+    public String get(String endpoint) throws NetworkException {
+        return get(endpoint, null);
     }
 
-    public String get(String path, String parameters) throws NetworkException {
-        String requestString = buildRequestUrl(path, parameters);
+    public String get(String endpoint, String parameters) throws NetworkException {
+        String requestString = buildRequestUrl(endpoint, parameters);
 
         HttpGet get = new HttpGet(requestString);
 
         return handleRequest(get, requestString);
     }
 
-    public String post(String path, String parameters, String json) throws NetworkException, UnsupportedEncodingException {
+    public String post(String endpoint, String parameters, String json) throws NetworkException, UnsupportedEncodingException {
         if (json == null) throw new NetworkException("JSON is null");
 
         LOGGER.info(json);
-        String requestString = buildRequestUrl(path, parameters);
+        String requestString = buildRequestUrl(endpoint, parameters);
 
         HttpPost post = new HttpPost(requestString);
         post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
@@ -68,9 +66,9 @@ public class HttpConnector implements AutoCloseable {
         }
     }
 
-    private String buildRequestUrl(String path, String parameters) throws NetworkException {
-        if (path == null) throw new NetworkException("Request path is null");
-        String requestString = String.format("%s%s%s?%s", host, token, path, parameters != null ? parameters : "");
+    private String buildRequestUrl(String endpoint, String parameters) throws NetworkException {
+        if (endpoint == null) throw new NetworkException("Request endpoint is null");
+        String requestString = String.format("%s%s?%s", url, endpoint, parameters != null ? parameters : "");
         return requestString;
     }
 

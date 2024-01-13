@@ -1,6 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
-import com.fatemorgan.hrbot.handlers.HRBot;
+import com.fatemorgan.hrbot.services.TelegramBotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/message")
-public class MessageController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageController.class);
+public class TelegramBotController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotController.class);
 
-    private HRBot bot;
+    private TelegramBotService bot;
 
-    public MessageController(HRBot bot) {
+    public TelegramBotController(TelegramBotService bot) {
         this.bot = bot;
     }
 

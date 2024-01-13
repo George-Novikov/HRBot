@@ -1,6 +1,5 @@
 package com.fatemorgan.hrbot.handlers;
 
-import com.fatemorgan.hrbot.config.TelegramConfig;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
@@ -11,7 +10,8 @@ import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -19,25 +19,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
-public class HRBot{
-    private static final Logger LOGGER = LoggerFactory.getLogger(HRBot.class);
-    private TelegramConfig config;
+@Component
+public class TelegramApi {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramApi.class);
+    @Value("${telegram.url}")
+    private String url;
+    @Value("${telegram.bot-token}")
+    private String botToken;
+    @Value("${telegram.chat-id}")
+    private Long chatID;
+
     private Map<Long, Boolean> messageReplyBuffer;
 
-    public HRBot(TelegramConfig config, Map<Long, Boolean> messageReplyBuffer) {
-        this.config = config;
+    public TelegramApi(Map<Long, Boolean> messageReplyBuffer) {
         this.messageReplyBuffer = messageReplyBuffer;
     }
 
     public String sendMessage(String message) throws Exception {
-        try (HttpConnector connector = new HttpConnector(config)){
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
             return connector.get("/sendMessage", buildMessageParams(message));
         }
     }
 
     public String reply(String message, Long repliedMessageID) throws Exception {
-        try (HttpConnector connector = new HttpConnector(config)){
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
             TelegramRequest request = new TelegramRequest(message, repliedMessageID);
             return connector.post(
                     "/sendMessage",
@@ -50,7 +55,7 @@ public class HRBot{
     public TelegramResponse getUpdates() {
         TelegramResponse response = null;
 
-        try (HttpConnector connector = new HttpConnector(config)){
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
             String jsonResponse = connector.get("/getUpdates");
             if (jsonResponse != null) response = TelegramResponseSerializer.deserialize(jsonResponse);
         } catch (Exception e){
@@ -87,8 +92,12 @@ public class HRBot{
 
     private String buildMessageParams(String message) throws UnsupportedEncodingException {
         return new UrlParamBuilder()
-                .add(TelegramApiParam.CHAT_ID, config.getChatID().toString())
+                .add(TelegramApiParam.CHAT_ID, chatID)
                 .add(TelegramApiParam.TEXT, URLEncoder.encode(message, "UTF-8"))
                 .build();
+    }
+
+    private String buildUrl(){
+        return String.format("%s%s", url, botToken);
     }
 }

@@ -21,7 +21,7 @@ public class SheetsController {
     @GetMapping("/test")
     public ResponseEntity test(){
         try {
-            googleSheetsService.printSheets();
+            googleSheetsService.getSheetsData();
             return ResponseEntity.ok().build();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

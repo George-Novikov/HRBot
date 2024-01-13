@@ -13,6 +13,12 @@ public class UrlParamBuilder {
         return this;
     }
 
+    public UrlParamBuilder add(String name, Long value){
+        if (builder.length() > 0) builder.append("&");
+        builder.append(name).append("=").append(value.toString());
+        return this;
+    }
+
     public String build(){
         return builder.toString();
     }
