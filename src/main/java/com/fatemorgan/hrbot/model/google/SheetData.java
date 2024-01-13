@@ -1,6 +1,7 @@
 package com.fatemorgan.hrbot.model.google;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
@@ -67,5 +68,13 @@ public class SheetData {
 
     public String toJson() throws JsonProcessingException {
         return JsonMaker.serialize(this);
+    }
+
+    public boolean isEmpty(){
+        return this.rows == null;
+    }
+
+    public boolean isProcessed(Action action){
+        return action.toString().equals(this.title) || action.equals(Action.ALL);
     }
 }

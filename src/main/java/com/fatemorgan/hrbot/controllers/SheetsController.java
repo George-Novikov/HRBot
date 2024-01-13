@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.services.GoogleSheetsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class SheetsController {
     @GetMapping("/test")
     public ResponseEntity test(){
         try {
-            googleSheetsService.getSheetsData();
+            googleSheetsService.getSheetsData(Action.SETTINGS_UPDATE);
             return ResponseEntity.ok().build();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

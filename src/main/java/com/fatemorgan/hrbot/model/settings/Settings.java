@@ -13,7 +13,6 @@ public class Settings {
     private String locale;
     private String dateFormat;
     private Map<String, String> columns;
-    private Map<String, Integer> columnOrder;
 
     public Settings(SheetData data){
         if (data.getRows() == null) return;

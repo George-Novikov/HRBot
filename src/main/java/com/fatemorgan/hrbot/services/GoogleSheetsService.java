@@ -1,7 +1,11 @@
 package com.fatemorgan.hrbot.services;
 
 
-import com.fatemorgan.hrbot.handlers.SheetExtractor;
+import com.fatemorgan.hrbot.tools.SheetExtractor;
+import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
+import com.fatemorgan.hrbot.model.chat.ChatReplies;
+import com.fatemorgan.hrbot.model.constants.Action;
+import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.exceptions.SheetsException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.Settings;
@@ -15,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,35 +39,40 @@ public class GoogleSheetsService {
         this.extractor = extractor;
     }
 
-    public void getSheetsData() throws IOException, SheetsException {
-
+    public void getSheetsData(Action action) throws IOException, SheetsException {
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetID).execute();
+
         List<SheetData> sheets = spreadsheet.getSheets()
                 .stream()
                 .map(sheet -> new SheetData(sheet, range))
                 .collect(Collectors.toList());
+        fillAllSheetsData(sheets, action);
 
+        Settings settings = extractor.getSettings(sheets);
+        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets);
+        EventsSchedule events = extractor.getEvents(sheets);
+        ChatReplies chatReplies = extractor.getChatReplies(sheets);
+
+        if (settings != null) LOGGER.info(settings.toJson());
+    }
+
+    private void fillAllSheetsData(List<SheetData> sheets, Action action) throws IOException {
         for (SheetData sheet : sheets){
-            ValueRange valueRange = sheetsService
-                    .spreadsheets()
-                    .values()
-                    .get(spreadsheetID, sheet.getRange())
-                    .execute();
-
-            if (valueRange == null || valueRange.getValues() == null) continue;
-
-            sheet.setRows(valueRange.getValues());
+            if (extractor.isExtracted(sheet, action)){
+                fillSheet(sheet);
+            }
         }
+    }
 
+    private void fillSheet(SheetData sheet) throws IOException {
+        ValueRange valueRange = sheetsService
+                .spreadsheets()
+                .values()
+                .get(spreadsheetID, sheet.getRange())
+                .execute();
 
-        SheetData settingsSheet = extractor.getSettingsSheet(sheets);
-        SheetData birthdaysSheet = extractor.getBirthdaysSheet(sheets);
-        SheetData eventsSheet = extractor.getEventsSheet(sheets);
-        SheetData chatSheet = extractor.getChatSheet(sheets);
+        if (valueRange == null || valueRange.getValues() == null) return;
 
-        if (settingsSheet != null){
-            Settings settings = new Settings(settingsSheet);
-            if (settings != null) LOGGER.info(settings.toJson());
-        }
+        sheet.setRows(valueRange.getValues());
     }
 }
