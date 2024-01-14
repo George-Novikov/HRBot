@@ -1,6 +1,8 @@
 package com.fatemorgan.hrbot.services;
 
 
+import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.tools.SheetExtractor;
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
@@ -26,20 +28,23 @@ import java.util.stream.Collectors;
 @Service
 public class GoogleSheetsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleSheetsService.class);
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMMM", new Locale("ru", "RU"));
     @Value("${google.spreadsheet-id}")
     private String spreadsheetID;
     @Value("${google.sheets.range-to-read}")
     private String range;
     private Sheets sheetsService;
     private SheetExtractor extractor;
+    private GlobalDataContainer container;
 
-    public GoogleSheetsService(Sheets sheetsService, SheetExtractor extractor) {
+    public GoogleSheetsService(Sheets sheetsService,
+                               SheetExtractor extractor,
+                               GlobalDataContainer container) {
         this.sheetsService = sheetsService;
         this.extractor = extractor;
+        this.container = container;
     }
 
-    public void getSheetsData(Action action) throws IOException, SettingsException {
+    public void performSheetsAction(Action action) throws IOException, SettingsException, DateParserException {
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetID).execute();
 
         List<SheetData> sheets = spreadsheet.getSheets()
@@ -56,17 +61,20 @@ public class GoogleSheetsService {
         ChatReplies chatReplies = extractor.getChatReplies(sheets, settings);
 
         if (settings != null) LOGGER.info(settings.toJson());
+        if (birthdays != null) LOGGER.info(birthdays.toJson());
+
+        container.init(settings, birthdays, events, chatReplies);
     }
 
     private void fillAllSheetsData(List<SheetData> sheets, Action action) throws IOException {
         for (SheetData sheet : sheets){
             if (extractor.isExtracted(sheet, action)){
-                fillSheet(sheet);
+                getSheetData(sheet);
             }
         }
     }
 
-    private void fillSheet(SheetData sheet) throws IOException {
+    private void getSheetData(SheetData sheet) throws IOException {
         ValueRange valueRange = sheetsService
                 .spreadsheets()
                 .values()

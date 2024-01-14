@@ -4,6 +4,7 @@ import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
+import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,7 @@ public class SheetExtractor {
         return isValid(settingsSheet) ? new Settings(settingsSheet, sheets) : null;
     }
 
-    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, Settings settings){
+    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, Settings settings) throws DateParserException {
         SheetData birthdaysSheet = getSheet(sheets, birthdaysSheetTitle);
         return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, settings) : null;
     }

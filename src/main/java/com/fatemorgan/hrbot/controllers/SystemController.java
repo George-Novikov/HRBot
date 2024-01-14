@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/sheets")
-public class SheetsController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SheetsController.class);
+public class SystemController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SystemController.class);
     private GoogleSheetsService googleSheetsService;
 
-    public SheetsController(GoogleSheetsService googleSheetsService) {
+    public SystemController(GoogleSheetsService googleSheetsService) {
         this.googleSheetsService = googleSheetsService;
     }
 
     @GetMapping("/test")
     public ResponseEntity test(){
         try {
-            googleSheetsService.getSheetsData(Action.ALL);
+            googleSheetsService.performSheetsAction(Action.ALL);
             return ResponseEntity.ok().build();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

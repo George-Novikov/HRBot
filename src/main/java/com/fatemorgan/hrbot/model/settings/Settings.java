@@ -4,21 +4,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
+import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
+import com.fatemorgan.hrbot.tools.LocaleParser;
+import com.fatemorgan.hrbot.tools.SafeReader;
+import org.springframework.format.datetime.DateFormatter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @JsonIgnoreProperties(value = {"dateParser"})
 public class Settings {
     private String locale;
     private String dateFormat;
+    private DateParser dateParser;
     private Map<String, String> columns;
     private Map<String, Integer> columnsOrder;
 
@@ -45,13 +49,23 @@ public class Settings {
     }
 
     @JsonProperty("dateParser")
-    public DateFormat getDateParser(){
-        if (this.locale == null || this.dateFormat == null){
-            return new SimpleDateFormat("dd MMMM", Locale.US);
-        }
+    public DateParser getDateParser() throws DateParserException {
+        if (this.dateParser != null) return this.dateParser;
 
-        Locale locale = new Locale(this.locale.toLowerCase(), this.locale.toUpperCase());
-        return new SimpleDateFormat(this.dateFormat, locale);
+        if (this.locale == null) this.locale = SettingsAttribute.DEFAULT_LOCALE;
+        if (this.dateFormat == null) this.dateFormat = SettingsAttribute.DEFAULT_DATE_FORMAT;
+
+        this.dateParser = new DateParser(
+                new DateFormatter(this.dateFormat),
+                LocaleParser.parse(this.locale)
+        );
+
+        return this.dateParser;
+    }
+
+    public Date parseDate(String dateString) throws DateParserException {
+        DateParser dateParser = getDateParser();
+        return SafeReader.parseDate(dateParser, dateString);
     }
 
     public void setDateFormat(String dateFormat) {
@@ -72,6 +86,16 @@ public class Settings {
 
     public void setColumnsOrder(Map<String, Integer> columnsOrder) {
         this.columnsOrder = columnsOrder;
+    }
+
+    public String getColumn(String name){
+        return this.columns != null ? columns.get(name) : null;
+    }
+
+    public Integer getColumnIndex(String name){
+        if (this.columnsOrder == null) return null;
+        String columnName = getColumn(name);
+        return columnName != null ? this.columnsOrder.get(columnName) : null;
     }
 
     private void fill(List<List<String>> rows){
@@ -119,5 +143,9 @@ public class Settings {
 
     public String toJson() throws JsonProcessingException {
         return JsonMaker.serialize(this);
+    }
+
+    public boolean isEmpty(){
+        return this.locale == null || this.dateFormat == null || this.columns == null || this.columnsOrder == null;
     }
 }
