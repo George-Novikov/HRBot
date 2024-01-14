@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +42,7 @@ public class GoogleSheetsService {
         this.container = container;
     }
 
-    public void performSheetsAction(Action action) throws IOException, SettingsException, DateParserException {
+    public void updateGlobalContainer(Action action) throws IOException, SettingsException, DateParserException {
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetID).execute();
 
         List<SheetData> sheets = spreadsheet.getSheets()
@@ -60,10 +58,7 @@ public class GoogleSheetsService {
         EventsSchedule events = extractor.getEvents(sheets, settings);
         ChatReplies chatReplies = extractor.getChatReplies(sheets, settings);
 
-        if (settings != null) LOGGER.info(settings.toJson());
-        if (birthdays != null) LOGGER.info(birthdays.toJson());
-
-        container.init(settings, birthdays, events, chatReplies);
+        container.load(settings, birthdays, events, chatReplies);
     }
 
     private void fillAllSheetsData(List<SheetData> sheets, Action action) throws IOException {

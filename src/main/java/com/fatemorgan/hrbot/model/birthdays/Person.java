@@ -38,4 +38,9 @@ public class Person {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
+    public boolean isEqualBirthday(Person person){
+        if (this.birthday == null || person.getBirthday() == null) return false;
+        return this.birthday.equals(person.getBirthday());
+    }
 }

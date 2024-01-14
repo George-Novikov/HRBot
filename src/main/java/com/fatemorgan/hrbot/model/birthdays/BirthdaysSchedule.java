@@ -11,7 +11,6 @@ import com.fatemorgan.hrbot.tools.PersonDateComparator;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import com.fatemorgan.hrbot.tools.Today;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,19 +32,30 @@ public class BirthdaysSchedule {
         this.employees = employees;
     }
 
-    public List<Person> findNext(DateParser dateParser) {
+    public List<Person> findNearest(DateParser dateParser) {
         if (this.employees.isEmpty()) return this.employees;
 
         Date today = Today.get(dateParser);
-        Collections.sort(this.employees, new PersonDateComparator(dateParser));
 
-        List<Person> nextBirthdays = new ArrayList<>();
-        for (Person person : this.employees){
-            Date birthday = dateParser.parse(person.getBirthday());
-            if (today.before(birthday)) nextBirthdays.add(person);
-        }
+        List<Person> nextBirthdays = this.employees
+                .stream()
+                .filter(person -> {
+                    Date birthday = dateParser.parse(person.getBirthday());
+                    return today.before(birthday);
+                })
+                .collect(Collectors.toList());
 
-        return nextBirthdays;
+        return nextBirthdays.isEmpty() ? nextBirthdays : findMostRelevant(nextBirthdays, dateParser);
+    }
+
+    private List<Person> findMostRelevant(List<Person> nextBirthdays, DateParser dateParser){
+        if (nextBirthdays == null || nextBirthdays.isEmpty()) return new ArrayList<>();
+        Collections.sort(nextBirthdays, new PersonDateComparator(dateParser));
+        Person nearest = nextBirthdays.get(0);
+        return nextBirthdays
+                .stream()
+                .filter(person -> nearest.isEqualBirthday(person))
+                .collect(Collectors.toList());
     }
 
     private void fillEmployees(SheetData sheet, Settings settings) throws DateParserException {

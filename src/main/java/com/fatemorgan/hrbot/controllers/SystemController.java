@@ -1,7 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
-import com.fatemorgan.hrbot.model.constants.Action;
-import com.fatemorgan.hrbot.services.GoogleSheetsService;
+import com.fatemorgan.hrbot.services.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -10,20 +9,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/sheets")
+@RequestMapping("/api/v1/system")
 public class SystemController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemController.class);
-    private GoogleSheetsService googleSheetsService;
+    private SystemService service;
 
-    public SystemController(GoogleSheetsService googleSheetsService) {
-        this.googleSheetsService = googleSheetsService;
+    public SystemController(SystemService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/settings")
+    public ResponseEntity getSettings(){
+        try {
+            return service.getSettings();
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 
     @GetMapping("/test")
     public ResponseEntity test(){
         try {
-            googleSheetsService.performSheetsAction(Action.ALL);
-            return ResponseEntity.ok().build();
+            return service.test();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return ResponseEntity.status(500).body(e.getMessage());

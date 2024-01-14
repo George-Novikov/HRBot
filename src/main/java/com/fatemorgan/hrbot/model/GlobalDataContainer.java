@@ -55,13 +55,13 @@ public class GlobalDataContainer {
         this.chatReplies = chatReplies;
     }
 
-    public void init(Settings settings,
+    public void load(Settings settings,
                      BirthdaysSchedule birthdays,
                      EventsSchedule events,
                      ChatReplies chatReplies) {
-        this.settings = settings;
-        this.birthdays = birthdays;
-        this.events = events;
-        this.chatReplies = chatReplies;
+        if (settings != null) this.settings = settings;
+        if (birthdays != null) this.birthdays = birthdays;
+        if (events != null) this.events = events;
+        if (chatReplies != null) this.chatReplies = chatReplies;
     }
 }
