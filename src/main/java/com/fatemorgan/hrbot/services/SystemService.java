@@ -7,6 +7,7 @@ import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.network.Responder;
+import com.fatemorgan.hrbot.tools.Today;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,15 @@ public class SystemService {
         if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
 
         return Responder.sendOk(settings);
+    }
+
+    public ResponseEntity getToday() throws IOException, SettingsException, DateParserException {
+        googleSheetsService.updateGlobalContainer(Action.SETTINGS_UPDATE);
+        Settings settings = globalContainer.getSettings();
+
+        if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
+
+        return Responder.sendOk(Today.get());
     }
 
     public ResponseEntity test() throws IOException, SettingsException, DateParserException {

@@ -18,6 +18,8 @@ import java.util.stream.IntStream;
 public class Settings {
     private String locale;
     private String dateFormat;
+    private String birthdayGreeting;
+    private String nextBirthdayRequest;
     private DateParser dateParser;
     private Map<String, String> columns;
     private Map<String, Integer> columnsOrder;
@@ -42,6 +44,22 @@ public class Settings {
 
     public String getDateFormat() {
         return dateFormat;
+    }
+
+    public String getBirthdayGreeting() {
+        return birthdayGreeting;
+    }
+
+    public void setBirthdayGreeting(String birthdayGreeting) {
+        this.birthdayGreeting = birthdayGreeting;
+    }
+
+    public String getNextBirthdayRequest() {
+        return nextBirthdayRequest;
+    }
+
+    public void setNextBirthdayRequest(String nextBirthdayRequest) {
+        this.nextBirthdayRequest = nextBirthdayRequest;
     }
 
     @JsonProperty("dateParser")
@@ -112,6 +130,12 @@ public class Settings {
             case SettingsAttribute.DATE_FORMAT:
                 this.dateFormat = value;
                 break;
+            case SettingsAttribute.BIRTHDAY_GREETING:
+                this.birthdayGreeting = value;
+                break;
+            case SettingsAttribute.NEXT_BIRTHDAY_REQUEST:
+                this.nextBirthdayRequest = value;
+                break;
             default:
                 if (!value.isEmpty()){
                     columns.put(key, value);
@@ -135,6 +159,10 @@ public class Settings {
                         );
                     });
         }
+    }
+
+    public boolean isHeader(String value){
+        return this.columns.entrySet().stream().anyMatch(entry -> entry.getValue().equals(value));
     }
 
     public String toJson() throws JsonProcessingException {

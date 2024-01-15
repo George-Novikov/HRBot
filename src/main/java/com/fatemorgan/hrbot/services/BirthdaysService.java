@@ -19,41 +19,32 @@ import java.io.IOException;
 @Service
 public class BirthdaysService {
     private GoogleSheetsService sheetsService;
-    private GlobalDataContainer container;
+    private GlobalDataContainer globalContainer;
 
     public BirthdaysService(GoogleSheetsService sheetsService,
-                               GlobalDataContainer container) {
+                               GlobalDataContainer globalContainer) {
         this.sheetsService = sheetsService;
-        this.container = container;
+        this.globalContainer = globalContainer;
     }
 
-    public ResponseEntity getAllBirthdays() throws IOException, SettingsException, DateParserException {
+    public ResponseEntity getBirthdays() throws IOException, SettingsException, DateParserException {
         sheetsService.updateGlobalContainer(Action.BIRTHDAYS_UPDATE);
-        BirthdaysSchedule birthdays = container.getBirthdays();
+        BirthdaysSchedule birthdays = globalContainer.getBirthdays();
 
         if (birthdays == null) return Responder.sendError(BirthdaysMessage.BIRTHDAYS_LOADING_ERROR);
 
-        return Responder.sendOk(birthdays.getEmployees());
+        return Responder.sendOk(birthdays);
     }
 
     public ResponseEntity getNextBirthdays() throws IOException, SettingsException, DateParserException {
         sheetsService.updateGlobalContainer(Action.BIRTHDAYS_UPDATE);
-        BirthdaysSchedule birthdays = container.getBirthdays();
-        Settings settings = container.getSettings();
+        BirthdaysSchedule birthdays = globalContainer.getBirthdays();
+        Settings settings = globalContainer.getSettings();
 
         if (birthdays == null) return Responder.sendError(BirthdaysMessage.BIRTHDAYS_LOADING_ERROR);
         if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
 
         DateParser dateParser = settings.getDateParser();
         return Responder.sendOk(birthdays.findNearest(dateParser));
-    }
-
-    public ResponseEntity getToday() throws IOException, SettingsException, DateParserException {
-        sheetsService.updateGlobalContainer(Action.SETTINGS_UPDATE);
-        Settings settings = container.getSettings();
-
-        if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
-
-        return Responder.sendOk(Today.get());
     }
 }

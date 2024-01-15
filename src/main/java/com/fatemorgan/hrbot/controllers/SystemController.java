@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.services.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class SystemController {
             return service.getSettings();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return Responder.sendError(e);
         }
     }
 
@@ -34,7 +35,17 @@ public class SystemController {
             return service.test();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return Responder.sendError(e);
+        }
+    }
+
+    @GetMapping("/getToday")
+    public ResponseEntity getToday(){
+        try {
+            return service.getToday();
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
         }
     }
 }

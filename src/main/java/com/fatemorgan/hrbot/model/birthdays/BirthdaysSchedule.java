@@ -7,7 +7,7 @@ import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.settings.DateParser;
 import com.fatemorgan.hrbot.model.settings.Settings;
-import com.fatemorgan.hrbot.tools.PersonDateComparator;
+import com.fatemorgan.hrbot.tools.comparators.PersonDateComparator;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import com.fatemorgan.hrbot.tools.Today;
 
@@ -18,10 +18,30 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BirthdaysSchedule {
+    private String birthdayGreeting;
+    private String nextBirthdayRequest;
     private List<Person> employees;
     public BirthdaysSchedule(SheetData sheet, Settings settings) throws DateParserException {
         this.employees = new ArrayList<>();
+        this.birthdayGreeting = settings.getBirthdayGreeting();
+        this.nextBirthdayRequest = settings.getNextBirthdayRequest();
         fillEmployees(sheet, settings);
+    }
+
+    public String getBirthdayGreeting() {
+        return birthdayGreeting;
+    }
+
+    public void setBirthdayGreeting(String birthdayGreeting) {
+        this.birthdayGreeting = birthdayGreeting;
+    }
+
+    public String getNextBirthdayRequest() {
+        return nextBirthdayRequest;
+    }
+
+    public void setNextBirthdayRequest(String nextBirthdayRequest) {
+        this.nextBirthdayRequest = nextBirthdayRequest;
     }
 
     public List<Person> getEmployees() {
@@ -58,7 +78,7 @@ public class BirthdaysSchedule {
                 .collect(Collectors.toList());
     }
 
-    private void fillEmployees(SheetData sheet, Settings settings) throws DateParserException {
+    private void fillEmployees(SheetData sheet, Settings settings) {
         if (sheet.isEmpty() || settings.isEmpty()) return;
 
         int nameIndex = settings.getColumnIndex(SettingsAttribute.NAME);
@@ -68,13 +88,13 @@ public class BirthdaysSchedule {
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;
 
-            employees.add(
-                    new Person(
-                            getSafeValue(row, nameIndex),
-                            getSafeValue(row, birthdayIndex),
-                            getSafeValue(row, nicknameIndex)
-                    )
-            );
+            String name = getSafeValue(row, nameIndex);
+            String birthday = getSafeValue(row, birthdayIndex);
+            String nickname =  getSafeValue(row, nicknameIndex);
+
+            if (settings.isHeader(name) || settings.isHeader(birthday) || settings.isHeader(nickname)) continue;
+
+            employees.add(new Person(name, birthday, nickname));
         }
     }
 
