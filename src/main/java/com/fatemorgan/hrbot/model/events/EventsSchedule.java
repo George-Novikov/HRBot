@@ -61,6 +61,8 @@ public class EventsSchedule {
         int dateIndex = settings.getColumnIndex(SettingsAttribute.EVENT_DATE);
         int announcementIndex = settings.getColumnIndex(SettingsAttribute.ANNOUNCEMENT);
 
+        //TODO: null check
+
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;
 

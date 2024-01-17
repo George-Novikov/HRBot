@@ -7,10 +7,9 @@ public class ReplyScheme {
     private String request;
     private String reply;
 
-    public ReplyScheme(List<Object> row){
-        if (row == null || row.size() < 2) return;
-        this.request = Objects.toString(row.get(0), "");
-        this.reply = Objects.toString(row.get(1), "");
+    public ReplyScheme(String request, String reply) {
+        this.request = request;
+        this.reply = reply;
     }
 
     public String getRequest() {
@@ -19,5 +18,9 @@ public class ReplyScheme {
 
     public String getReply() {
         return reply;
+    }
+
+    public boolean isRequested(String request){
+        return this.request.trim().equalsIgnoreCase(request.trim());
     }
 }

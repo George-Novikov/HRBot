@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,9 +21,11 @@ public class SystemController {
     }
 
     @GetMapping("/settings")
-    public ResponseEntity getSettings(){
+    public ResponseEntity getSettings(
+            @RequestParam(value = "isFull", defaultValue = "false") boolean isFull
+    ){
         try {
-            return service.getSettings();
+            return service.getSettings(isFull);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);

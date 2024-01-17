@@ -24,8 +24,8 @@ public class SystemService {
         this.globalContainer = globalContainer;
     }
 
-    public ResponseEntity getSettings() throws IOException, SettingsException, DateParserException {
-        googleSheetsService.updateGlobalContainer(Action.SETTINGS_UPDATE);
+    public ResponseEntity getSettings(boolean isFull) throws IOException, SettingsException, DateParserException {
+        googleSheetsService.updateGlobalContainer(isFull ? Action.ALL : Action.SETTINGS_UPDATE);
 
         Settings settings = globalContainer.getSettings();
         if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);

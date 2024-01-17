@@ -85,6 +85,8 @@ public class BirthdaysSchedule {
         int birthdayIndex = settings.getColumnIndex(SettingsAttribute.BIRTHDAY);
         int nicknameIndex = settings.getColumnIndex(SettingsAttribute.NICKNAME);
 
+        //TODO: null check
+
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;
 
