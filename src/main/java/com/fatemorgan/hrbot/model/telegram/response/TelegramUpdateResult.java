@@ -26,4 +26,12 @@ public class TelegramUpdateResult {
     public void setMessage(TelegramMessage message) {
         this.message = message;
     }
+
+    public boolean isEmpty(){
+        return this.message == null || this.message.isEmpty();
+    }
+    public boolean isCitation(String nickname){
+        if (isEmpty()) return false;
+        return this.message.isCitation(nickname);
+    }
 }

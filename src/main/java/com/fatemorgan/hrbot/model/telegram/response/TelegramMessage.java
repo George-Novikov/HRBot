@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fatemorgan.hrbot.model.telegram.response.entities.Chat;
 import com.fatemorgan.hrbot.model.telegram.response.entities.Sender;
 
-import java.util.Date;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelegramMessage {
     private Long messageID;
@@ -54,5 +52,14 @@ public class TelegramMessage {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public boolean isEmpty(){
+        return this.text == null || this.text.isEmpty();
+    }
+
+    public boolean isCitation(String nickname){
+        if (isEmpty()) return false;
+        return this.text.startsWith(nickname);
     }
 }

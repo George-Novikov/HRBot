@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Component
 public class TelegramApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramApi.class);
+    @Value("${telegram.bot-name}")
+    private String botName;
     @Value("${telegram.url}")
     private String url;
     @Value("${telegram.bot-token}")
@@ -69,20 +71,19 @@ public class TelegramApi {
 
     public String replyUnanswered() throws Exception {
         TelegramResponse response = getUpdates();
-        if (response == null || response.getResult() == null) return "No updates";
+        if (response == null || response.isEmpty()) return "No updates";
+
+        String botNickname = String.format("@%s", botName);
 
         List<TelegramMessage> messages = response.getResult()
                 .stream()
-                .filter(result -> result.getMessage() != null)
+                .filter(result -> result.isCitation(botNickname))
                 .map(result -> result.getMessage())
                 .collect(Collectors.toList());
 
         for (TelegramMessage message : messages){
-            Boolean isAnswered = messageReplyBuffer.get(message.getMessageID());
-
-            if (!Boolean.TRUE.equals(isAnswered)){
+            if (!isAnswered(message)){
                 String jsonResponse = reply("Reply", message.getMessageID());
-
                 if (jsonResponse != null) messageReplyBuffer.put(message.getMessageID(), true);
             }
         }
@@ -99,5 +100,10 @@ public class TelegramApi {
 
     private String buildUrl(){
         return String.format("%s%s", url, botToken);
+    }
+
+    private boolean isAnswered(TelegramMessage message){
+        Boolean isAnswered = messageReplyBuffer.get(message.getMessageID());
+        return Boolean.TRUE.equals(isAnswered);
     }
 }

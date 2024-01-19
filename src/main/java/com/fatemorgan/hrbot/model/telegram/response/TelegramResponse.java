@@ -34,4 +34,8 @@ public class TelegramResponse {
                 .filter(updRes -> updRes.getMessage() != null)
                 .collect(Collectors.toList());
     }
+
+    public boolean isEmpty(){
+        return this.result == null || this.result.isEmpty();
+    }
 }
