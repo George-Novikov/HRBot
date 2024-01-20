@@ -23,4 +23,13 @@ public class Today {
         String stringBuffer = dateParser.parse(today);
         return dateParser.parse(stringBuffer);
     }
+
+    public static String getString(DateParser dateParser) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        Instant instant = new Date().toInstant();
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
+
+        Date today = Date.from(zonedDateTime.toInstant());
+        return dateParser.parse(today);
+    }
 }
