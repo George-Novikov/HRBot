@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.workers;
+package com.fatemorgan.hrbot.tools;
 
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
@@ -10,7 +10,6 @@ import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
 import com.fatemorgan.hrbot.storage.MessageStorage;
-import com.fatemorgan.hrbot.tools.SafeReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +32,7 @@ public class TelegramApi {
     @Value("${telegram.bot-token}")
     private String botToken;
     @Value("${telegram.chat-id}")
-    private Long chatID;
+    private Long defaultChatID;
 
     private MessageStorage messageStorage;
 
@@ -45,18 +44,22 @@ public class TelegramApi {
 
     public String sendMessage(String message) throws Exception {
         try (HttpConnector connector = new HttpConnector(buildUrl())){
-            return connector.get("/sendMessage", buildMessageParams(message));
+            return connector.get("/sendMessage", buildMessageParams(message, this.defaultChatID));
         }
     }
 
-    public String reply(String message, Long repliedMessageID) throws Exception {
-        if (!SafeReader.isValid(message)) return null;
+    public String reply(String replyText, TelegramMessage message) throws Exception {
+        return reply(replyText, message.getMessageID(), message.getChatID());
+    }
+
+    public String reply(String text, Long repliedMessageID, Long chatID) throws Exception {
+        if (!SafeReader.isValid(text)) return null;
 
         try (HttpConnector connector = new HttpConnector(buildUrl())){
-            TelegramRequest request = new TelegramRequest(message, repliedMessageID);
+            TelegramRequest request = new TelegramRequest(text, repliedMessageID);
             return connector.post(
                     "/sendMessage",
-                    buildMessageParams(message),
+                    buildMessageParams(text, chatID != null ? chatID : defaultChatID),
                     TelegramRequestSerializer.serialize(request)
             );
         }
@@ -93,13 +96,13 @@ public class TelegramApi {
         Set<Long> repliedMessageIDs = new HashSet<>();
         for (TelegramMessage message : messages){
             String reply = chatReplies.getCitationReply(message.getText(), botNickName);
-            String jsonResponse = reply(reply, message.getMessageID());
+            String jsonResponse = reply(reply, message);
             if (SafeReader.isValid(jsonResponse)) repliedMessageIDs.add(message.getMessageID());
         }
         return repliedMessageIDs;
     }
 
-    private String buildMessageParams(String message) throws UnsupportedEncodingException {
+    private String buildMessageParams(String message, Long chatID) throws UnsupportedEncodingException {
         return new UrlParamBuilder()
                 .add(TelegramApiParam.CHAT_ID, chatID)
                 .add(TelegramApiParam.TEXT, URLEncoder.encode(message, "UTF-8"))

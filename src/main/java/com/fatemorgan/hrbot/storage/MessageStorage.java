@@ -3,8 +3,8 @@ package com.fatemorgan.hrbot.storage;
 import com.fatemorgan.hrbot.model.serializers.LongSetSerializer;
 import com.fatemorgan.hrbot.model.serializers.StringSetSerializer;
 import com.fatemorgan.hrbot.model.settings.DateParser;
-import com.fatemorgan.hrbot.tools.Today;
-import com.fatemorgan.hrbot.tools.Yesterday;
+import com.fatemorgan.hrbot.tools.datetime.Today;
+import com.fatemorgan.hrbot.tools.datetime.Yesterday;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -103,7 +103,7 @@ public class MessageStorage {
         }
     }
 
-    private void saveCurrentFileNames(Set<String> fileNames) throws IOException {
+    private void saveCurrentFileNames(Set<String> fileNames) {
         try {
             String jsonFileNames = StringSetSerializer.serialize(fileNames);
             FileManager.write(managementFile, jsonFileNames);
@@ -124,7 +124,7 @@ public class MessageStorage {
     private boolean isStorageStateUpToDate(){
         if (storageStateDate == null || !isStorageInit() || !isMessageIDBufferInit()) return false;
         Date today = Today.get(dateParser);
-        return storageStateDate.before(today);
+        return storageStateDate.equals(today);
     }
 
     public File getTodayFile() throws IOException {

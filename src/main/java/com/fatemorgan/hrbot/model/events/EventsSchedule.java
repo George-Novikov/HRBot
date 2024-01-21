@@ -5,7 +5,7 @@ import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.DateParser;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.tools.SafeReader;
-import com.fatemorgan.hrbot.tools.Today;
+import com.fatemorgan.hrbot.tools.datetime.Today;
 import com.fatemorgan.hrbot.tools.comparators.EventsDateComparator;
 
 import java.util.ArrayList;
@@ -43,6 +43,10 @@ public class EventsSchedule {
                 .collect(Collectors.toList());
 
         return nextEvents.isEmpty() ? nextEvents : findMostRelevant(nextEvents, dateParser);
+    }
+
+    public boolean isEmpty(){
+        return this.events == null || this.events.isEmpty();
     }
 
     private List<Event> findMostRelevant(List<Event> nextEvents, DateParser dateParser){

@@ -1,5 +1,4 @@
-package com.fatemorgan.hrbot.workers.timers.tasks;
-
+package com.fatemorgan.hrbot.timers.tasks;
 
 import com.fatemorgan.hrbot.services.TelegramBotService;
 import org.slf4j.Logger;
@@ -9,19 +8,19 @@ import org.springframework.stereotype.Component;
 import java.util.TimerTask;
 
 @Component
-public class ChatTask extends TimerTask {
+public class BirthdaysTask extends TimerTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(BirthdaysTask.class);
     private TelegramBotService bot;
 
-    public ChatTask(TelegramBotService bot) {
+    public BirthdaysTask(TelegramBotService bot) {
         this.bot = bot;
     }
 
     @Override
     public void run() {
-        LOGGER.info("ChatTask is working");
+        LOGGER.info("BirthdaysTask is working");
         try {
-            bot.replyUnanswered();
+            bot.processCurrentBirthdays();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
         }

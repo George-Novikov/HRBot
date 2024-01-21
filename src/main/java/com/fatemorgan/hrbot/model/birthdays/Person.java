@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.model.birthdays;
 
+import com.fatemorgan.hrbot.model.constants.Placeholder;
 import com.fatemorgan.hrbot.model.settings.DateParser;
 
 import java.util.Date;
@@ -42,5 +43,9 @@ public class Person {
     public boolean isEqualBirthday(Person person){
         if (this.birthday == null || person.getBirthday() == null) return false;
         return this.birthday.equals(person.getBirthday());
+    }
+
+    public String adaptGreetings(String greetingsText){
+        return greetingsText.replace(Placeholder.NAME, this.name);
     }
 }

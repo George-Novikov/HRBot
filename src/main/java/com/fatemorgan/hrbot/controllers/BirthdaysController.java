@@ -1,5 +1,7 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
+import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.services.BirthdaysService;
 import org.slf4j.Logger;
@@ -9,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/birthdays")
@@ -23,7 +27,8 @@ public class BirthdaysController {
     @GetMapping
     public ResponseEntity getAllBirthdays(){
         try {
-            return service.getBirthdays();
+            BirthdaysSchedule birthdays = service.getBirthdays();
+            return Responder.sendOk(birthdays);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);
@@ -33,7 +38,19 @@ public class BirthdaysController {
     @GetMapping("/next")
     public ResponseEntity getNextBirthdays(){
         try {
-            return service.getNextBirthdays();
+            List<Person> nextBirthdays = service.getNextBirthdays();
+            return Responder.sendOk(nextBirthdays);
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
+        }
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity getCurrentBirthdays(){
+        try {
+            List<Person> nextBirthdays = service.getCurrentBirthdays();
+            return Responder.sendOk(nextBirthdays);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);

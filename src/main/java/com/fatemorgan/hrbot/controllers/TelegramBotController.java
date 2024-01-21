@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.fatemorgan.hrbot.model.constants.ChatMessage.EMPTY_CHAT_REPLIES;
 
 @RestController
-@RequestMapping("/api/v1/message")
+@RequestMapping("/api/v1/bot")
 public class TelegramBotController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotController.class);
 
@@ -25,7 +25,7 @@ public class TelegramBotController {
         this.bot = bot;
     }
 
-    @GetMapping(path = "/send")
+    @GetMapping(path = "/messages/send")
     public ResponseEntity sendMessage(@RequestParam(value = "text", defaultValue = "") String text){
         try {
             return ResponseEntity.ok(bot.sendMessage(text));
@@ -35,7 +35,7 @@ public class TelegramBotController {
         }
     }
 
-    @GetMapping(path = "/reply")
+    @GetMapping(path = "/messages/reply")
     public ResponseEntity reply(
             @RequestParam(value = "text", defaultValue = "") String text,
             @RequestParam(value = "reply_message_id", defaultValue = "0") Long replyMessageID
@@ -44,27 +44,38 @@ public class TelegramBotController {
             return ResponseEntity.ok(bot.reply(text, replyMessageID));
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return Responder.sendError(e);
         }
     }
 
-    @GetMapping(path = "/replyUnanswered")
+    @GetMapping(path = "/messages/replyUnanswered")
     public ResponseEntity replyUnanswered(){
         try {
-            return bot.replyUnanswered();
+            return Responder.sendOk(bot.replyUnanswered());
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return Responder.sendError(e);
         }
     }
 
-    @GetMapping(path = "/getUpdates")
+    @GetMapping(path = "/messages/getUpdates")
     public ResponseEntity getUpdates(){
         try {
             return ResponseEntity.ok(bot.getUpdates());
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return Responder.sendError(e);
+        }
+    }
+
+    @GetMapping(path = "/birthdays/process/current")
+    public ResponseEntity processCurrentBirthdays(){
+        try {
+            String response = bot.processCurrentBirthdays();
+            return Responder.sendOk(response);
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
         }
     }
 }

@@ -1,14 +1,16 @@
-package com.fatemorgan.hrbot.workers.timers;
+package com.fatemorgan.hrbot.timers;
 
-import com.fatemorgan.hrbot.workers.timers.tasks.BirthdaysTask;
+import com.fatemorgan.hrbot.timers.tasks.BirthdaysTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 @Component
 public class BirthdaysTimer extends Timer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatTimer.class);
     @Value("${telegram.timers.update-rate.birthdays}")
     private Integer birthdaysUpdateRate;
 
@@ -19,6 +21,8 @@ public class BirthdaysTimer extends Timer {
     }
 
     public void start() {
-        this.scheduleAtFixedRate(birthdaysTask, birthdaysUpdateRate, birthdaysUpdateRate);
+        long seconds = birthdaysUpdateRate * 1000;
+        LOGGER.info("BirthdaysTimer has started with update rate: {} seconds", birthdaysUpdateRate);
+        this.scheduleAtFixedRate(birthdaysTask, 0, seconds);
     }
 }

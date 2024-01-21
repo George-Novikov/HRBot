@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.workers.timers.tasks;
+package com.fatemorgan.hrbot.timers.tasks;
 
 import java.util.TimerTask;
 

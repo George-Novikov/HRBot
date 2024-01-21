@@ -2,6 +2,7 @@ package com.fatemorgan.hrbot.model;
 
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
+import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.settings.Settings;
 
@@ -63,5 +64,21 @@ public class GlobalDataContainer {
         if (birthdays != null) this.birthdays = birthdays;
         if (events != null) this.events = events;
         if (chatReplies != null) this.chatReplies = chatReplies;
+    }
+
+    public boolean hasSettings(){
+        return this.settings != null && !this.settings.isEmpty();
+    }
+
+    public boolean hasBirthdays(){
+        return this.birthdays != null && !this.birthdays.isEmpty();
+    }
+
+    public boolean hasEvents(){
+        return this.events != null && !this.events.isEmpty();
+    }
+
+    public boolean hasChatReplies(){
+        return this.chatReplies != null && !this.chatReplies.isEmpty();
     }
 }

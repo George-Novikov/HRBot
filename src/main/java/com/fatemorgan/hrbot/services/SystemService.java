@@ -7,7 +7,7 @@ import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.network.Responder;
-import com.fatemorgan.hrbot.tools.Today;
+import com.fatemorgan.hrbot.tools.datetime.Today;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

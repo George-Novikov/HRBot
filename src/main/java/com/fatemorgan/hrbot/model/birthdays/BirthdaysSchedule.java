@@ -9,7 +9,7 @@ import com.fatemorgan.hrbot.model.settings.DateParser;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.tools.comparators.PersonDateComparator;
 import com.fatemorgan.hrbot.tools.SafeReader;
-import com.fatemorgan.hrbot.tools.Today;
+import com.fatemorgan.hrbot.tools.datetime.Today;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,20 +52,37 @@ public class BirthdaysSchedule {
         this.employees = employees;
     }
 
-    public List<Person> findNearest(DateParser dateParser) {
+    public List<Person> findCurrentBirthday(DateParser dateParser){
         if (this.employees.isEmpty()) return this.employees;
-
         Date today = Today.get(dateParser);
+        return filterByCurrentDate(today, dateParser);
+    }
 
-        List<Person> nextBirthdays = this.employees
+    public List<Person> findNearestBirthday(DateParser dateParser) {
+        if (this.employees.isEmpty()) return this.employees;
+        Date today = Today.get(dateParser);
+        List<Person> nextBirthdays = filterByFutureDate(today, dateParser);
+        return nextBirthdays.isEmpty() ? nextBirthdays : findMostRelevant(nextBirthdays, dateParser);
+    }
+
+    private List<Person> filterByFutureDate(Date date, DateParser dateParser){
+        return this.employees
                 .stream()
                 .filter(person -> {
                     Date birthday = dateParser.parse(person.getBirthday());
-                    return today.before(birthday);
+                    return date.before(birthday);
                 })
                 .collect(Collectors.toList());
+    }
 
-        return nextBirthdays.isEmpty() ? nextBirthdays : findMostRelevant(nextBirthdays, dateParser);
+    private List<Person> filterByCurrentDate(Date date, DateParser dateParser){
+        return this.employees
+                .stream()
+                .filter(person -> {
+                    Date birthday = dateParser.parse(person.getBirthday());
+                    return date.equals(birthday);
+                })
+                .collect(Collectors.toList());
     }
 
     private List<Person> findMostRelevant(List<Person> nextBirthdays, DateParser dateParser){
@@ -106,5 +123,9 @@ public class BirthdaysSchedule {
 
     public String toJson() throws JsonProcessingException {
         return JsonMaker.serialize(this);
+    }
+
+    public boolean isEmpty(){
+        return this.employees == null || this.employees.isEmpty();
     }
 }

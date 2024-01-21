@@ -54,6 +54,11 @@ public class TelegramMessage {
         this.text = text;
     }
 
+    public Long getChatID(){
+        if (this.chat == null) return null;
+        return this.chat.getId();
+    }
+
     public boolean isEmpty(){
         return this.text == null || this.text.isEmpty();
     }

@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.tools;
+package com.fatemorgan.hrbot.tools.datetime;
 
 import com.fatemorgan.hrbot.model.settings.DateParser;
 import org.springframework.format.datetime.DateFormatter;
