@@ -24,6 +24,8 @@ public class MessageStorage {
     private File managementFile;
     private File todayFile;
     private File yesterdayFile;
+    private Set<Long> todayMessageIDs;
+    private Set<Long> yesterdayMessageIDs;
     private Date storageStateDate;
 
     public MessageStorage(@Qualifier("storageDateParser") DateParser dateParser,
@@ -38,8 +40,10 @@ public class MessageStorage {
 
         try {
             updateStorage();
+            updateMessageIDBuffer();
+            todayMessageIDs.addAll(messageIDs);
 
-            String json = LongSetSerializer.serialize(messageIDs);
+            String json = LongSetSerializer.serialize(todayMessageIDs);
             FileManager.write(todayFile, json);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
@@ -49,14 +53,8 @@ public class MessageStorage {
     public boolean isAnswered(Long messageID){
         try {
             updateStorage();
-
-            String todayJson = FileManager.read(todayFile);
-            String yesterdayJson = FileManager.read(yesterdayFile);
-
-            Set<Long> yesterdayReplies = LongSetSerializer.deserialize(yesterdayJson);
-            Set<Long> todayReplies = LongSetSerializer.deserialize(todayJson);
-
-            return yesterdayReplies.contains(messageID) || todayReplies.contains(messageID);
+            updateMessageIDBuffer();
+            return yesterdayMessageIDs.contains(messageID) || todayMessageIDs.contains(messageID);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return false;
@@ -124,7 +122,7 @@ public class MessageStorage {
     }
     
     private boolean isStorageStateUpToDate(){
-        if (storageStateDate == null || !isStorageInit()) return false;
+        if (storageStateDate == null || !isStorageInit() || !isMessageIDBufferInit()) return false;
         Date today = Today.get(dateParser);
         return storageStateDate.before(today);
     }
@@ -149,12 +147,31 @@ public class MessageStorage {
         return String.format("%s.json", Yesterday.getString(dateParser));
     }
 
+    private void updateMessageIDBuffer() throws Exception {
+        if (!isStorageInit()) updateStorage();
+        loadTodayMessageIDBuffer();
+        loadYesterdayMessageIDBuffer();
+    }
+    private void loadTodayMessageIDBuffer() throws Exception {
+        String todayJson = FileManager.read(todayFile);
+        this.todayMessageIDs = LongSetSerializer.deserialize(todayJson);
+    }
+
+    private void loadYesterdayMessageIDBuffer() throws Exception {
+        String yesterdayJson = FileManager.read(yesterdayFile);
+        this.yesterdayMessageIDs = LongSetSerializer.deserialize(yesterdayJson);
+    }
+
     private boolean isValidFileName(String fileName){
         return fileName.equals(getTodayFileName()) || fileName.equals(getYesterdayFileName());
     }
 
     private boolean isStorageInit(){
         return todayFile != null && yesterdayFile != null;
+    }
+
+    private boolean isMessageIDBufferInit(){
+        return todayMessageIDs != null && this.yesterdayMessageIDs != null;
     }
 
     private void cleanUp(Set<String> outdatedFileNames){

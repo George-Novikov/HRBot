@@ -7,7 +7,6 @@ import com.fatemorgan.hrbot.tools.SafeReader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ChatReplies {
     private List<ReplyScheme> replies;
@@ -24,13 +23,18 @@ public class ChatReplies {
         this.replies = replies;
     }
 
-    public String getReplyText(String request){
+    public String getReply(String request){
         return this.replies
                 .stream()
                 .filter(scheme -> scheme.isRequested(request))
                 .map(scheme -> scheme.getReply())
                 .findFirst()
                 .orElse("");
+    }
+
+    public String getCitationReply(String request, String citation){
+        request = request.replace(String.format("%s ", citation), "");
+        return getReply(request);
     }
 
     private void fillReplies(SheetData sheet, Settings settings){
@@ -55,5 +59,9 @@ public class ChatReplies {
 
     private String getSafeValue(List<String> row, int index){
         return SafeReader.getValue(row, index);
+    }
+
+    public boolean isEmpty(){
+        return this.replies == null || this.replies.isEmpty();
     }
 }

@@ -22,13 +22,9 @@ public class ChatService {
         this.globalContainer = globalContainer;
     }
 
-    public ResponseEntity getChatReplies() throws IOException, SettingsException, DateParserException {
+    public ChatReplies getChatReplies() throws IOException, SettingsException, DateParserException {
         googleSheetsService.updateGlobalContainer(Action.CHAT_UPDATE);
-
-        ChatReplies chatReplies = globalContainer.getChatReplies();
-        if (chatReplies == null) return Responder.sendError(BirthdaysMessage.BIRTHDAYS_LOADING_ERROR);
-
-        return Responder.sendOk(chatReplies);
+        return globalContainer.getChatReplies();
     }
 
     public ResponseEntity getReplyText(String request) throws IOException, SettingsException, DateParserException {
@@ -37,6 +33,8 @@ public class ChatService {
         ChatReplies chatReplies = globalContainer.getChatReplies();
         if (chatReplies == null) return Responder.sendError(BirthdaysMessage.BIRTHDAYS_LOADING_ERROR);
 
-        return Responder.sendOk(chatReplies.getReplyText(request));
+        return Responder.sendOk(chatReplies.getReply(request));
     }
+
+
 }

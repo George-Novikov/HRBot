@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.handlers;
 
+import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
@@ -9,8 +10,10 @@ import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
 import com.fatemorgan.hrbot.storage.MessageStorage;
+import com.fatemorgan.hrbot.tools.SafeReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +21,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class TelegramApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramApi.class);
-    @Value("${telegram.bot-name}")
-    private String botName;
+    private String botNickName;
     @Value("${telegram.url}")
     private String url;
     @Value("${telegram.bot-token}")
@@ -36,8 +37,10 @@ public class TelegramApi {
 
     private MessageStorage messageStorage;
 
-    public TelegramApi(MessageStorage messageStorage) {
+    public TelegramApi(MessageStorage messageStorage,
+                       @Qualifier("botNickName") String botNickName) {
         this.messageStorage = messageStorage;
+        this.botNickName = botNickName;
     }
 
     public String sendMessage(String message) throws Exception {
@@ -47,6 +50,8 @@ public class TelegramApi {
     }
 
     public String reply(String message, Long repliedMessageID) throws Exception {
+        if (!SafeReader.isValid(message)) return null;
+
         try (HttpConnector connector = new HttpConnector(buildUrl())){
             TelegramRequest request = new TelegramRequest(message, repliedMessageID);
             return connector.post(
@@ -72,29 +77,26 @@ public class TelegramApi {
         return response;
     }
 
-    public String replyUnanswered() throws Exception {
+    public String replyUnanswered(ChatReplies chatReplies) throws Exception {
         TelegramResponse response = getUpdates();
         if (response == null || response.isEmpty()) return "No updates";
 
-        String botNickname = String.format("@%s", botName);
+        List<TelegramMessage> citations = getCitationMessages(response);
+        List<TelegramMessage> unanswered = getUnanswered(citations);
 
-        List<TelegramMessage> messages = response.getResult()
-                .stream()
-                .filter(result -> result.isCitation(botNickname))
-                .map(result -> result.getMessage())
-                .collect(Collectors.toList());
-
-        Set<Long> repliedMessageIDs = new HashSet<>();
-        for (TelegramMessage message : messages){
-            if (!isAnswered(message)){
-                String jsonResponse = reply("Reply", message.getMessageID());
-                if (jsonResponse != null) repliedMessageIDs.add(message.getMessageID());
-            }
-        }
-
+        Set<Long> repliedMessageIDs = replyAll(unanswered, chatReplies);
         messageStorage.saveReplies(repliedMessageIDs);
 
         return repliedMessageIDs.toString();
+    }
+    private Set<Long> replyAll(List<TelegramMessage> messages, ChatReplies chatReplies) throws Exception {
+        Set<Long> repliedMessageIDs = new HashSet<>();
+        for (TelegramMessage message : messages){
+            String reply = chatReplies.getCitationReply(message.getText(), botNickName);
+            String jsonResponse = reply(reply, message.getMessageID());
+            if (SafeReader.isValid(jsonResponse)) repliedMessageIDs.add(message.getMessageID());
+        }
+        return repliedMessageIDs;
     }
 
     private String buildMessageParams(String message) throws UnsupportedEncodingException {
@@ -102,6 +104,18 @@ public class TelegramApi {
                 .add(TelegramApiParam.CHAT_ID, chatID)
                 .add(TelegramApiParam.TEXT, URLEncoder.encode(message, "UTF-8"))
                 .build();
+    }
+
+    private List<TelegramMessage> getCitationMessages(TelegramResponse response){
+        return response.getResult()
+                .stream()
+                .filter(result -> result.isCitation(botNickName))
+                .map(result -> result.getMessage())
+                .collect(Collectors.toList());
+    }
+
+    private List<TelegramMessage> getUnanswered(List<TelegramMessage> messages){
+        return messages.stream().filter(message -> !isAnswered(message)).collect(Collectors.toList());
     }
 
     private String buildUrl(){

@@ -1,5 +1,7 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.model.chat.ChatReplies;
+import com.fatemorgan.hrbot.model.constants.BirthdaysMessage;
 import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.services.ChatService;
 import org.slf4j.Logger;
@@ -23,7 +25,9 @@ public class ChatController {
     @GetMapping("/replies")
     public ResponseEntity getChatReplies(){
         try {
-            return service.getChatReplies();
+            ChatReplies chatReplies = service.getChatReplies();
+            if (chatReplies == null) return Responder.sendError(BirthdaysMessage.BIRTHDAYS_LOADING_ERROR);
+            return Responder.sendOk(chatReplies);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);

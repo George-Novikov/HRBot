@@ -1,6 +1,7 @@
 package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.handlers.TelegramApi;
+import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class TelegramBotService {
         return api.getUpdates();
     }
 
-    public String replyUnanswered() throws Exception {
-        return api.replyUnanswered();
+    public String replyUnanswered(ChatReplies chatReplies) throws Exception {
+        return api.replyUnanswered(chatReplies);
     }
 }

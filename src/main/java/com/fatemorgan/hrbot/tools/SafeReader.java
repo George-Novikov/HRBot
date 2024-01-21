@@ -1,11 +1,7 @@
 package com.fatemorgan.hrbot.tools;
 
 import com.fatemorgan.hrbot.model.settings.DateParser;
-import org.springframework.format.datetime.DateFormatter;
 
-import java.text.DateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -22,5 +18,13 @@ public class SafeReader {
         } catch (Exception e){
             return null;
         }
+    }
+
+    public static boolean isBlank(String value){
+        return value.chars().allMatch(c -> c == 32);
+    }
+
+    public static boolean isValid(String value){
+        return value != null && !value.isEmpty() && !isBlank(value);
     }
 }
