@@ -13,13 +13,12 @@ import java.util.Map;
 public class GeneralConfig {
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public Map<Long, Boolean> messageReplyBuffer(){
-        return new HashMap();
-    }
-
-    @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public GlobalDataContainer globalDataContainer(){
         return new GlobalDataContainer();
+    }
+
+    public static boolean isUnixSystem(){
+        String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("nix") || osName.contains("nux");
     }
 }

@@ -1,6 +1,5 @@
 package com.fatemorgan.hrbot.network;
 
-import com.fatemorgan.hrbot.config.TelegramConfig;
 import com.fatemorgan.hrbot.model.exceptions.NetworkException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;

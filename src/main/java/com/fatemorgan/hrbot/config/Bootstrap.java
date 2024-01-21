@@ -13,7 +13,7 @@ public class Bootstrap implements CommandLineRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
     @Override
     public void run(String... args) throws Exception {
-        LOGGER.info("Timezone: {}", TimeZone.getDefault());
-        LOGGER.info("Locale: {}", Locale.getDefault());
+        LOGGER.info("Current timezone: {}", TimeZone.getDefault());
+        LOGGER.info("Current locale: {}", Locale.getDefault());
     }
 }

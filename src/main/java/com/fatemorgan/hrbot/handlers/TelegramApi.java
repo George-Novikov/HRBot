@@ -8,6 +8,7 @@ import com.fatemorgan.hrbot.model.telegram.response.TelegramMessage;
 import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
+import com.fatemorgan.hrbot.storage.MessageStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,10 +34,10 @@ public class TelegramApi {
     @Value("${telegram.chat-id}")
     private Long chatID;
 
-    private Map<Long, Boolean> messageReplyBuffer;
+    private MessageStorage messageStorage;
 
-    public TelegramApi(Map<Long, Boolean> messageReplyBuffer) {
-        this.messageReplyBuffer = messageReplyBuffer;
+    public TelegramApi(MessageStorage messageStorage) {
+        this.messageStorage = messageStorage;
     }
 
     public String sendMessage(String message) throws Exception {
@@ -81,14 +84,17 @@ public class TelegramApi {
                 .map(result -> result.getMessage())
                 .collect(Collectors.toList());
 
+        Set<Long> repliedMessageIDs = new HashSet<>();
         for (TelegramMessage message : messages){
             if (!isAnswered(message)){
                 String jsonResponse = reply("Reply", message.getMessageID());
-                if (jsonResponse != null) messageReplyBuffer.put(message.getMessageID(), true);
+                if (jsonResponse != null) repliedMessageIDs.add(message.getMessageID());
             }
         }
 
-        return messageReplyBuffer.toString();
+        messageStorage.saveReplies(repliedMessageIDs);
+
+        return repliedMessageIDs.toString();
     }
 
     private String buildMessageParams(String message) throws UnsupportedEncodingException {
@@ -103,7 +109,6 @@ public class TelegramApi {
     }
 
     private boolean isAnswered(TelegramMessage message){
-        Boolean isAnswered = messageReplyBuffer.get(message.getMessageID());
-        return Boolean.TRUE.equals(isAnswered);
+        return messageStorage.isAnswered(message.getMessageID());
     }
 }

@@ -5,19 +5,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class LongSetSerializer {
+public class StringSetSerializer {
     private static final ObjectMapper SERIALIZER = new ObjectMapper();
-    private static final TypeReference<Set<Long>> LONG_LIST_TYPE = new TypeReference<Set<Long>>(){};
+    private static final TypeReference<Set<String>> STRING_SET_TYPE = new TypeReference<Set<String>>(){};
 
-    public static String serialize(Set<Long> list) throws JsonProcessingException {
+    public static String serialize(Set<String> list) throws JsonProcessingException {
         return SERIALIZER.writeValueAsString(list);
     }
 
-    public static Set<Long> deserialize(String json) throws JsonProcessingException {
+    public static Set<String> deserialize(String json) throws JsonProcessingException {
         if (json == null || json.isEmpty()) return new HashSet<>();
-        return SERIALIZER.readValue(json, LONG_LIST_TYPE);
+        return SERIALIZER.readValue(json, STRING_SET_TYPE);
     }
 }
