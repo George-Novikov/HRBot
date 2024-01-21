@@ -7,6 +7,7 @@ import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import com.fatemorgan.hrbot.tools.datetime.Today;
 import com.fatemorgan.hrbot.tools.comparators.EventsDateComparator;
+import com.fatemorgan.hrbot.tools.datetime.Tomorrow;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,24 +30,40 @@ public class EventsSchedule {
         this.events = events;
     }
 
-    public List<Event> findNext(DateParser dateParser){
+    public List<Event> findTomorrowEvents(DateParser dateParser){
         if (this.events.isEmpty()) return this.events;
+        Date tomorrow = Tomorrow.get(dateParser);
+        return filterByEqualDate(tomorrow, dateParser);
+    }
 
+    public List<Event> findNextEvents(DateParser dateParser){
+        if (this.events.isEmpty()) return this.events;
         Date today = Today.get(dateParser);
-
-        List<Event> nextEvents = this.events
-                .stream()
-                .filter(event -> {
-                    Date eventDate = dateParser.parse(event.getDate());
-                    return today.before(eventDate);
-                })
-                .collect(Collectors.toList());
-
+        List<Event> nextEvents = filterByNearestDate(today, dateParser);
         return nextEvents.isEmpty() ? nextEvents : findMostRelevant(nextEvents, dateParser);
     }
 
     public boolean isEmpty(){
         return this.events == null || this.events.isEmpty();
+    }
+
+    private List<Event> filterByEqualDate(Date date, DateParser dateParser){
+        return this.events
+                .stream()
+                .filter(event -> {
+                    Date eventDate = dateParser.parse(event.getDate());
+                    return date.equals(eventDate);
+                })
+                .collect(Collectors.toList());
+    }
+    private List<Event> filterByNearestDate(Date date, DateParser dateParser){
+        return this.events
+                .stream()
+                .filter(event -> {
+                    Date eventDate = dateParser.parse(event.getDate());
+                    return date.before(eventDate);
+                })
+                .collect(Collectors.toList());
     }
 
     private List<Event> findMostRelevant(List<Event> nextEvents, DateParser dateParser){

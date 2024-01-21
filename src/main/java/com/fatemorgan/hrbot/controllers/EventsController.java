@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.services.EventsService;
 import org.slf4j.Logger;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/events")
@@ -32,7 +35,8 @@ public class EventsController {
     @GetMapping("/next")
     public ResponseEntity getNextEvents(){
         try {
-            return service.getNextEvents();
+            List<Event> nextEvents = service.getNextEvents();
+            return Responder.sendOk(service.getNextEvents());
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);

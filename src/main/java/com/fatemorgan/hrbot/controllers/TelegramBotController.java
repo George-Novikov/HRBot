@@ -1,8 +1,6 @@
 package com.fatemorgan.hrbot.controllers;
 
-import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.network.Responder;
-import com.fatemorgan.hrbot.services.ChatService;
 import com.fatemorgan.hrbot.services.TelegramBotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.fatemorgan.hrbot.model.constants.ChatMessage.EMPTY_CHAT_REPLIES;
 
 @RestController
 @RequestMapping("/api/v1/bot")
@@ -72,6 +68,17 @@ public class TelegramBotController {
     public ResponseEntity processCurrentBirthdays(){
         try {
             String response = bot.processCurrentBirthdays();
+            return Responder.sendOk(response);
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
+        }
+    }
+
+    @GetMapping(path = "/events/getTomorrowEvent")
+    public ResponseEntity processTomorrowEvents(){
+        try {
+            String response = bot.processTomorrowEvents();
             return Responder.sendOk(response);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

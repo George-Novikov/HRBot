@@ -13,6 +13,8 @@ public class TelegramMessage {
     private Long date;
     private String text;
 
+    //TODO: isSticker(); sticker.getText() -> this.getText();
+
     @JsonProperty("message_id")
     public Long getMessageID() {
         return messageID;

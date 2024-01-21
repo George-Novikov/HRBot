@@ -1,11 +1,16 @@
 package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.constants.Action;
+import com.fatemorgan.hrbot.model.constants.BirthdaysMessage;
 import com.fatemorgan.hrbot.model.constants.EventsMessage;
 import com.fatemorgan.hrbot.model.constants.SystemMessage;
+import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
+import com.fatemorgan.hrbot.model.exceptions.BirthdaysException;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
+import com.fatemorgan.hrbot.model.exceptions.EventsException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.network.Responder;
@@ -13,6 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class EventsService {
@@ -27,20 +35,37 @@ public class EventsService {
     public ResponseEntity getEvents() throws IOException, SettingsException, DateParserException {
         this.googleSheetsService.updateGlobalContainer(Action.EVENTS_UPDATE);
 
+        if (!globalContainer.hasEvents()) return Responder.sendError(EventsMessage.EVENTS_LOADING_ERROR);
         EventsSchedule events = globalContainer.getEvents();
-        if (events == null) return Responder.sendError(EventsMessage.EVENTS_LOADING_ERROR);
 
         return Responder.sendOk(events);
     }
 
-    public ResponseEntity getNextEvents() throws IOException, SettingsException, DateParserException {
-        this.googleSheetsService.updateGlobalContainer(Action.EVENTS_UPDATE);
+    public List<Event> getNextEvents() throws IOException, SettingsException, DateParserException, EventsException {
+        initGlobalContainer();
 
         EventsSchedule events = globalContainer.getEvents();
         Settings settings = globalContainer.getSettings();
-        if (events == null) return Responder.sendError(EventsMessage.EVENTS_LOADING_ERROR);
-        if (settings == null) return Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
 
-        return Responder.sendOk(events.findNext(settings.getDateParser()));
+        return events.findNextEvents(settings.getDateParser());
+    }
+
+    public List<Event> getTomorrowEvents() throws IOException, SettingsException, DateParserException, EventsException {
+        initGlobalContainer();
+
+        EventsSchedule events = globalContainer.getEvents();
+        Settings settings = globalContainer.getSettings();
+
+        return events.findTomorrowEvents(settings.getDateParser());
+    }
+
+    public Set<String> extractEventNames(List<Event> events){
+        return events.stream().map(person -> person.getDate()).collect(Collectors.toSet());
+    }
+
+    private void initGlobalContainer() throws IOException, SettingsException, DateParserException, EventsException {
+        googleSheetsService.updateGlobalContainer(Action.EVENTS_UPDATE);
+        if (!globalContainer.hasEvents()) throw new EventsException(EventsMessage.EVENTS_LOADING_ERROR);
+        if (!globalContainer.hasSettings()) throw new SettingsException(SystemMessage.SETTINGS_LOADING_ERROR);
     }
 }

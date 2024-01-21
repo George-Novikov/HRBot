@@ -1,7 +1,9 @@
 package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.birthdays.Person;
+import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.model.exceptions.ChatException;
+import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.storage.EventsStorage;
 import com.fatemorgan.hrbot.tools.TelegramApi;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
@@ -31,15 +33,18 @@ public class TelegramBotService {
     private TelegramApi api;
     private ChatService chatService;
     private BirthdaysService birthdaysService;
+    private EventsService eventsService;
     private EventsStorage eventsStorage;
 
     public TelegramBotService(TelegramApi api,
                               ChatService chatService,
                               BirthdaysService birthdaysService,
+                              EventsService eventsService,
                               EventsStorage eventsStorage) {
         this.api = api;
         this.chatService = chatService;
         this.birthdaysService = birthdaysService;
+        this.eventsService = eventsService;
         this.eventsStorage = eventsStorage;
     }
 
@@ -65,7 +70,7 @@ public class TelegramBotService {
         List<Person> currentBirthdays = birthdaysService.getCurrentBirthdays();
         if (currentBirthdays == null || currentBirthdays.isEmpty()) return new HashSet().toString();
 
-        currentBirthdays = filterUnprocessed(currentBirthdays);
+        currentBirthdays = filterUnprocessedBirthdays(currentBirthdays);
         Set<String> eventNames = birthdaysService.extractEventNames(currentBirthdays);
 
         List<String> greetings = birthdaysService.getCurrentBirthdayWishes(currentBirthdays);
@@ -80,10 +85,33 @@ public class TelegramBotService {
         return greetings.toString();
     }
 
-    private List<Person> filterUnprocessed(List<Person> people){
+    public String processTomorrowEvents() throws Exception {
+        List<Event> events = eventsService.getTomorrowEvents();
+        if (events == null || events.isEmpty()) return new HashSet().toString();
+
+        events = filterUnprocessedEvents(events);
+        Set<String> eventNames = eventsService.extractEventNames(events);
+
+        for (Event event : events){
+            sendMessage(event.getAnnouncementText());
+        }
+
+        eventsStorage.saveProcessedEvents(eventNames);
+
+        return JsonMaker.serialize(events);
+    }
+
+    private List<Person> filterUnprocessedBirthdays(List<Person> people){
         return people
                 .stream()
                 .filter(person -> !eventsStorage.isProcessed(person.getName()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Event> filterUnprocessedEvents(List<Event> events){
+        return events
+                .stream()
+                .filter(event -> !eventsStorage.isProcessed(event.getDate()))
                 .collect(Collectors.toList());
     }
 }

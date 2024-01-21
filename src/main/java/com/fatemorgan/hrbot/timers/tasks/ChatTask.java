@@ -10,7 +10,7 @@ import java.util.TimerTask;
 
 @Component
 public class ChatTask extends TimerTask {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BirthdaysTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatTask.class);
     private TelegramBotService bot;
 
     public ChatTask(TelegramBotService bot) {

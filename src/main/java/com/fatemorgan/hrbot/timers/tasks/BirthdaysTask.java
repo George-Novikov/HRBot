@@ -18,7 +18,6 @@ public class BirthdaysTask extends TimerTask {
 
     @Override
     public void run() {
-        LOGGER.info("BirthdaysTask is working");
         try {
             bot.processCurrentBirthdays();
         } catch (Exception e){

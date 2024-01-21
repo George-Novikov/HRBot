@@ -2,6 +2,7 @@ package com.fatemorgan.hrbot.config;
 
 import com.fatemorgan.hrbot.timers.BirthdaysTimer;
 import com.fatemorgan.hrbot.timers.ChatTimer;
+import com.fatemorgan.hrbot.timers.EventsTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -16,18 +17,23 @@ public class Bootstrap implements CommandLineRunner {
 
     private ChatTimer chatTimer;
     private BirthdaysTimer birthdaysTimer;
+    private EventsTimer eventsTimer;
 
-    public Bootstrap(ChatTimer chatTimer, BirthdaysTimer birthdaysTimer) {
+    public Bootstrap(ChatTimer chatTimer,
+                     BirthdaysTimer birthdaysTimer,
+                     EventsTimer eventsTimer) {
         this.chatTimer = chatTimer;
         this.birthdaysTimer = birthdaysTimer;
+        this.eventsTimer = eventsTimer;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        LOGGER.info("Current timezone: {}", TimeZone.getDefault());
-        LOGGER.info("Current locale: {}", Locale.getDefault());
+        LOGGER.info("System timezone: {}", TimeZone.getDefault());
+        LOGGER.info("System locale: {}", Locale.getDefault());
 
         chatTimer.start();
         birthdaysTimer.start();
+        eventsTimer.start();
     }
 }
