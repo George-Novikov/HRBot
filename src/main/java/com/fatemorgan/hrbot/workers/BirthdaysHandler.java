@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.handlers;
+package com.fatemorgan.hrbot.workers;
 
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.settings.Settings;

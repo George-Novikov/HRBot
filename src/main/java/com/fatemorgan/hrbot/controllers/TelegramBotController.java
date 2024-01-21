@@ -20,12 +20,9 @@ public class TelegramBotController {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotController.class);
 
     private TelegramBotService bot;
-    private ChatService chatService;
 
-    public TelegramBotController(TelegramBotService bot,
-                                 ChatService chatService) {
+    public TelegramBotController(TelegramBotService bot) {
         this.bot = bot;
-        this.chatService = chatService;
     }
 
     @GetMapping(path = "/send")
@@ -54,9 +51,7 @@ public class TelegramBotController {
     @GetMapping(path = "/replyUnanswered")
     public ResponseEntity replyUnanswered(){
         try {
-            ChatReplies chatReplies = chatService.getChatReplies();
-            if (chatReplies == null || chatReplies.isEmpty()) return Responder.sendError(EMPTY_CHAT_REPLIES);
-            return ResponseEntity.ok(bot.replyUnanswered(chatReplies));
+            return bot.replyUnanswered();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return ResponseEntity.status(500).body(e.getMessage());

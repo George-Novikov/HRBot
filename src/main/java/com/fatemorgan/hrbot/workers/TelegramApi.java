@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.handlers;
+package com.fatemorgan.hrbot.workers;
 
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;

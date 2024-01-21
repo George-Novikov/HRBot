@@ -1,8 +1,8 @@
-package com.fatemorgan.hrbot.handlers;
+package com.fatemorgan.hrbot.workers;
 
-import com.fatemorgan.hrbot.model.timers.BirthdaysTimer;
-import com.fatemorgan.hrbot.model.timers.ChatTimer;
-import com.fatemorgan.hrbot.model.timers.EventsTimer;
+import com.fatemorgan.hrbot.workers.timers.BirthdaysTimer;
+import com.fatemorgan.hrbot.workers.timers.ChatTimer;
+import com.fatemorgan.hrbot.workers.timers.EventsTimer;
 import org.springframework.stereotype.Component;
 
 import java.util.TimerTask;
