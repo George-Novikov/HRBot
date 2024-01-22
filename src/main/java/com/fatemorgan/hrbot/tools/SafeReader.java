@@ -2,6 +2,7 @@ package com.fatemorgan.hrbot.tools;
 
 import com.fatemorgan.hrbot.model.settings.DateParser;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,10 @@ public class SafeReader {
         } catch (Exception e){
             return null;
         }
+    }
+
+    public static <T> boolean isValid(Collection<T> collection){
+        return collection != null && !collection.isEmpty();
     }
 
     public static boolean isBlank(String value){

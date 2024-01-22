@@ -35,6 +35,10 @@ public class MessageStorage {
         updateStorage();
     }
 
+    public void saveReply(Long messageID){
+        saveReplies(new HashSet<Long>(){{ add(messageID); }});
+    }
+
     public void saveReplies(Set<Long> messageIDs) {
         if (messageIDs == null || messageIDs.isEmpty()) return;
 

@@ -48,6 +48,12 @@ public class TelegramApi {
         }
     }
 
+    public String sendMessage(String message, Long chatID) throws Exception {
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
+            return connector.get("/sendMessage", buildMessageParams(message, chatID != null ? chatID : this.defaultChatID));
+        }
+    }
+
     public String reply(String replyText, TelegramMessage message) throws Exception {
         return reply(replyText, message.getMessageID(), message.getChatID());
     }
@@ -80,18 +86,30 @@ public class TelegramApi {
         return response;
     }
 
-    public String replyUnanswered(ChatReplies chatReplies) throws Exception {
+    public List<TelegramMessage> getUnansweredMessages(ChatReplies chatReplies) throws Exception {
         TelegramResponse response = getUpdates();
-        if (response == null || response.isEmpty()) return "No updates";
+        if (response == null || response.isEmpty()) return null;
 
         List<TelegramMessage> citations = getCitationMessages(response);
-        List<TelegramMessage> unanswered = getUnanswered(citations);
+        return filterUnanswered(citations);
+    }
+
+    public String processUnansweredMessages(List<TelegramMessage> unanswered, ChatReplies chatReplies) throws Exception {
+        Set<Long> repliedMessageIDs = replyAll(unanswered, chatReplies);
+        messageStorage.saveReplies(repliedMessageIDs);
+
+        return repliedMessageIDs.toString();
+    }
+
+    public String replyUnanswered(ChatReplies chatReplies) throws Exception {
+        List<TelegramMessage> unanswered = getUnansweredMessages(chatReplies);
 
         Set<Long> repliedMessageIDs = replyAll(unanswered, chatReplies);
         messageStorage.saveReplies(repliedMessageIDs);
 
         return repliedMessageIDs.toString();
     }
+
     private Set<Long> replyAll(List<TelegramMessage> messages, ChatReplies chatReplies) throws Exception {
         Set<Long> repliedMessageIDs = new HashSet<>();
         for (TelegramMessage message : messages){
@@ -117,7 +135,7 @@ public class TelegramApi {
                 .collect(Collectors.toList());
     }
 
-    private List<TelegramMessage> getUnanswered(List<TelegramMessage> messages){
+    private List<TelegramMessage> filterUnanswered(List<TelegramMessage> messages){
         return messages.stream().filter(message -> !isAnswered(message)).collect(Collectors.toList());
     }
 

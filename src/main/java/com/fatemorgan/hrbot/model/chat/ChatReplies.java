@@ -3,16 +3,28 @@ package com.fatemorgan.hrbot.model.chat;
 import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.telegram.response.TelegramMessage;
 import com.fatemorgan.hrbot.tools.SafeReader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChatReplies {
+    private String nextBirthdayRequest;
     private List<ReplyScheme> replies;
     public ChatReplies(SheetData sheet, Settings settings){
+        this.nextBirthdayRequest = settings.getNextBirthdayRequest();
         this.replies = new ArrayList<>();
         fillReplies(sheet, settings);
+    }
+
+    public String getNextBirthdayRequest() {
+        return nextBirthdayRequest;
+    }
+
+    public void setNextBirthdayRequest(String nextBirthdayRequest) {
+        this.nextBirthdayRequest = nextBirthdayRequest;
     }
 
     public List<ReplyScheme> getReplies() {
@@ -33,7 +45,7 @@ public class ChatReplies {
     }
 
     public String getCitationReply(String request, String citation){
-        request = request.replace(String.format("%s ", citation), "");
+        request = request.replace(citation, "");
         return getReply(request);
     }
 
@@ -55,6 +67,22 @@ public class ChatReplies {
 
             replies.add(new ReplyScheme(request, reply));
         }
+    }
+
+    public TelegramMessage extractBirthdayRequest(List<TelegramMessage> messages){
+        if (this.nextBirthdayRequest == null || messages == null) return null;
+        return messages
+                .stream()
+                .filter(message -> !message.isEmpty() && message.isRequested(nextBirthdayRequest))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean hasNextBirthdayRequest(List<TelegramMessage> messages){
+        if (this.nextBirthdayRequest == null || messages == null) return false;
+        return messages
+                .stream()
+                .anyMatch(message -> !message.isEmpty() && message.isRequested(nextBirthdayRequest));
     }
 
     private String getSafeValue(List<String> row, int index){

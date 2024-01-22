@@ -69,4 +69,9 @@ public class TelegramMessage {
         if (isEmpty()) return false;
         return this.text.startsWith(nickname);
     }
+
+    public boolean isRequested(String sampleText){
+        if (this.text == null || sampleText == null) return false;
+        return this.text.toLowerCase().trim().contains(sampleText.toLowerCase().trim());
+    }
 }
