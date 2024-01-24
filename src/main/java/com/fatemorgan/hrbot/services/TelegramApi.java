@@ -1,7 +1,8 @@
-package com.fatemorgan.hrbot.tools;
+package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
+import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
 import com.fatemorgan.hrbot.model.telegram.request.TelegramRequest;
@@ -10,6 +11,7 @@ import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
 import com.fatemorgan.hrbot.storage.MessageStorage;
+import com.fatemorgan.hrbot.tools.SafeReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -90,8 +92,18 @@ public class TelegramApi {
         TelegramResponse response = getUpdates();
         if (response == null || response.isEmpty()) return null;
 
-        List<TelegramMessage> citations = getCitationMessages(response);
+        List<TelegramMessage> messages = getMessages(response);
+        List<TelegramMessage> citations = getCitationMessages(messages);
+        List<TelegramMessage> stickers = getStickers(messages);
+        if (!stickers.isEmpty()) processStickers(stickers, chatReplies);
+
         return filterUnanswered(citations);
+    }
+
+    public String processStickers(List<TelegramMessage> stickers, ChatReplies chatReplies) throws Exception {
+        stickers = filterUnanswered(stickers);
+
+        return processUnansweredMessages(stickers, chatReplies);
     }
 
     public String processUnansweredMessages(List<TelegramMessage> unanswered, ChatReplies chatReplies) throws Exception {
@@ -113,7 +125,8 @@ public class TelegramApi {
     private Set<Long> replyAll(List<TelegramMessage> messages, ChatReplies chatReplies) throws Exception {
         Set<Long> repliedMessageIDs = new HashSet<>();
         for (TelegramMessage message : messages){
-            String reply = chatReplies.getCitationReply(message.getText(), botNickName);
+            String reply = message.isSticker() ? chatReplies.getCitationReply(message.getText(), botNickName) : chatReplies.getReply(message.getText());
+            if (reply == null) continue;
             String jsonResponse = reply(reply, message);
             if (SafeReader.isValid(jsonResponse)) repliedMessageIDs.add(message.getMessageID());
         }
@@ -127,11 +140,21 @@ public class TelegramApi {
                 .build();
     }
 
-    private List<TelegramMessage> getCitationMessages(TelegramResponse response){
-        return response.getResult()
+    private List<TelegramMessage> getMessages(TelegramResponse response){
+        return response.getResult().stream().map(res -> res.getMessage()).collect(Collectors.toList());
+    }
+
+    private List<TelegramMessage> getCitationMessages(List<TelegramMessage> messages){
+        return messages
                 .stream()
-                .filter(result -> result.isCitation(botNickName))
-                .map(result -> result.getMessage())
+                .filter(message -> message.isCitation(botNickName))
+                .collect(Collectors.toList());
+    }
+
+    private List<TelegramMessage> getStickers(List<TelegramMessage> messages){
+        return messages
+                .stream()
+                .filter(message -> message.isSticker())
                 .collect(Collectors.toList());
     }
 

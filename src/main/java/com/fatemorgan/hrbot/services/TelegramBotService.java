@@ -2,25 +2,18 @@ package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.events.Event;
-import com.fatemorgan.hrbot.model.exceptions.BirthdaysException;
 import com.fatemorgan.hrbot.model.exceptions.ChatException;
-import com.fatemorgan.hrbot.model.exceptions.DateParserException;
-import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.telegram.response.TelegramMessage;
 import com.fatemorgan.hrbot.storage.EventsStorage;
 import com.fatemorgan.hrbot.storage.MessageStorage;
-import com.fatemorgan.hrbot.tools.SafeReader;
-import com.fatemorgan.hrbot.tools.TelegramApi;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

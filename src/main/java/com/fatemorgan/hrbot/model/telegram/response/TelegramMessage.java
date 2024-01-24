@@ -12,8 +12,7 @@ public class TelegramMessage {
     private Chat chat;
     private Long date;
     private String text;
-
-    //TODO: isSticker(); sticker.getText() -> this.getText();
+    private Sticker sticker;
 
     @JsonProperty("message_id")
     public Long getMessageID() {
@@ -49,11 +48,24 @@ public class TelegramMessage {
     }
 
     public String getText() {
+        if (isSticker()) return this.sticker.getEmoji();
         return text;
     }
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public Sticker getSticker() {
+        return sticker;
+    }
+
+    public void setSticker(Sticker sticker) {
+        this.sticker = sticker;
+    }
+
+    public boolean isSticker(){
+        return this.sticker != null && !this.sticker.isEmpty();
     }
 
     public Long getChatID(){

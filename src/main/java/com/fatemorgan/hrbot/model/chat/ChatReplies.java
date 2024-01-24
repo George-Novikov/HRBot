@@ -8,11 +8,11 @@ import com.fatemorgan.hrbot.tools.SafeReader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ChatReplies {
     private String nextBirthdayRequest;
     private List<ReplyScheme> replies;
+    private List<ReplyScheme> stickerReplies;
     public ChatReplies(SheetData sheet, Settings settings){
         this.nextBirthdayRequest = settings.getNextBirthdayRequest();
         this.replies = new ArrayList<>();
@@ -55,7 +55,7 @@ public class ChatReplies {
         Integer requestIndex = settings.getColumnIndex(SettingsAttribute.REQUEST);
         Integer replyIndex = settings.getColumnIndex(SettingsAttribute.REPLY);
 
-        //TODO: null check
+        if (requestIndex == null || replyIndex == null) return;
 
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;

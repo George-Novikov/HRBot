@@ -1,7 +1,6 @@
 package com.fatemorgan.hrbot.model.chat;
 
-import java.util.List;
-import java.util.Objects;
+import com.fatemorgan.hrbot.model.constants.Placeholder;
 
 public class ReplyScheme {
     private String request;
@@ -21,6 +20,12 @@ public class ReplyScheme {
     }
 
     public boolean isRequested(String request){
+        if (isStickerScheme()) this.request = this.request.replace(Placeholder.STICKER, "");
         return this.request.trim().equalsIgnoreCase(request.trim());
+    }
+
+    public boolean isStickerScheme(){
+        if (request == null || request.isEmpty()) return false;
+        return this.request.startsWith(Placeholder.STICKER);
     }
 }
