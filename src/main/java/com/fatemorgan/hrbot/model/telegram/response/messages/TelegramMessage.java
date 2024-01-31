@@ -1,9 +1,10 @@
-package com.fatemorgan.hrbot.model.telegram.response;
+package com.fatemorgan.hrbot.model.telegram.response.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fatemorgan.hrbot.model.telegram.response.entities.Chat;
-import com.fatemorgan.hrbot.model.telegram.response.entities.Sender;
+import com.fatemorgan.hrbot.model.telegram.response.messages.Chat;
+import com.fatemorgan.hrbot.model.telegram.response.messages.Sender;
+import com.fatemorgan.hrbot.model.telegram.response.stickers.Sticker;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelegramMessage {

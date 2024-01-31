@@ -1,22 +1,25 @@
 package com.fatemorgan.hrbot.model.telegram.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fatemorgan.hrbot.model.chat.ReplyScheme;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReplyMarkup {
     private List<List<InlineButton>> inlineKeyboard;
 
     public ReplyMarkup() {}
 
-    public ReplyMarkup(List<List<InlineButton>> inlineKeyboard) {
-        this.inlineKeyboard = inlineKeyboard;
+    public ReplyMarkup(List<InlineButton> inlineButtons) {
+        this.inlineKeyboard = inlineButtons
+                .stream()
+                .map(button -> new ArrayList<InlineButton>(){{ add(button); }})
+                .collect(Collectors.toList());
     }
+    public ReplyMarkup(ReplyScheme replyScheme){
 
-    public ReplyMarkup(ArrayList<InlineButton> inlineButtons) {
-        this.inlineKeyboard = new ArrayList<>();
-        this.inlineKeyboard.add(inlineButtons);
     }
 
     @JsonProperty("inline_keyboard")

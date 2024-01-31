@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.model.telegram.response;
+package com.fatemorgan.hrbot.model.telegram.response.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,9 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class TelegramUpdateResult {
+public class MessageUpdateResult {
     private Long updateID;
     private TelegramMessage message;
+
 
     @JsonProperty("update_id")
     public Long getUpdateID() {

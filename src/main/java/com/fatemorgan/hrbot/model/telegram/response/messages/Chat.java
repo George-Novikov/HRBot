@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.model.telegram.response.entities;
+package com.fatemorgan.hrbot.model.telegram.response.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

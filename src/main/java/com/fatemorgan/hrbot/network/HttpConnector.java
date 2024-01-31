@@ -44,7 +44,6 @@ public class HttpConnector implements AutoCloseable {
     public String post(String endpoint, String parameters, String json) throws NetworkException, UnsupportedEncodingException {
         if (json == null) throw new NetworkException("JSON is null");
 
-        LOGGER.info(json);
         String requestString = buildRequestUrl(endpoint, parameters);
 
         HttpPost post = new HttpPost(requestString);

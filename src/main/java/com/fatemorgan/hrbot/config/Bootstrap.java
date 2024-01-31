@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.config;
 
+import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.timers.BirthdaysTimer;
 import com.fatemorgan.hrbot.timers.ChatTimer;
 import com.fatemorgan.hrbot.timers.EventsTimer;

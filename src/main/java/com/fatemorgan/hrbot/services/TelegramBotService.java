@@ -4,11 +4,11 @@ import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.model.exceptions.ChatException;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
-import com.fatemorgan.hrbot.model.telegram.response.TelegramMessage;
+import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
 import com.fatemorgan.hrbot.storage.EventsStorage;
 import com.fatemorgan.hrbot.storage.MessageStorage;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
-import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
+import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +65,7 @@ public class TelegramBotService {
         return api.reply(message, repliedMessageID, null);
     }
 
-    public TelegramResponse getUpdates() {
+    public TelegramMessageResponse getUpdates() {
         return api.getUpdates();
     }
 

@@ -1,4 +1,4 @@
-package com.fatemorgan.hrbot.model.telegram.response;
+package com.fatemorgan.hrbot.model.telegram.response.messages;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class TelegramResponse {
+public class TelegramMessageResponse {
     private Boolean ok;
-    private List<TelegramUpdateResult> result;
+    private List<MessageUpdateResult> result;
 
     public Boolean getOk() {
         return ok;
@@ -20,11 +20,11 @@ public class TelegramResponse {
         this.ok = ok;
     }
 
-    public List<TelegramUpdateResult> getResult() {
+    public List<MessageUpdateResult> getResult() {
         return result;
     }
 
-    public void setResult(List<TelegramUpdateResult> result) {
+    public void setResult(List<MessageUpdateResult> result) {
         this.result = result;
     }
 

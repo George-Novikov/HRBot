@@ -5,9 +5,9 @@ import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
-import com.fatemorgan.hrbot.model.telegram.request.TelegramRequest;
-import com.fatemorgan.hrbot.model.telegram.response.TelegramMessage;
-import com.fatemorgan.hrbot.model.telegram.response.TelegramResponse;
+import com.fatemorgan.hrbot.model.telegram.request.TelegramMessageRequest;
+import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
+import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessageResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
 import com.fatemorgan.hrbot.network.UrlParamBuilder;
 import com.fatemorgan.hrbot.storage.MessageStorage;
@@ -44,6 +44,17 @@ public class TelegramApi {
         this.botNickName = botNickName;
     }
 
+    public String getBotInfo() throws Exception {
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
+            return connector.get("/getMe", "");
+        }
+    }
+
+    public String getAvailableChats(){
+        //TODO
+        return null;
+    }
+
     public String sendMessage(String message) throws Exception {
         try (HttpConnector connector = new HttpConnector(buildUrl())){
             return connector.get("/sendMessage", buildMessageParams(message, this.defaultChatID));
@@ -56,6 +67,18 @@ public class TelegramApi {
         }
     }
 
+    public String sendSticker(String fileID, Long chatID) throws Exception{
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
+            return connector.get("/sendSticker", buildStickerParams(fileID, chatID));
+        }
+    }
+
+    public String getStickerSet(String stickerSetCode) throws Exception {
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
+            return connector.get("/getStickerSet", buildStickerSetParams(stickerSetCode));
+        }
+    }
+
     public String reply(String replyText, TelegramMessage message) throws Exception {
         return reply(replyText, message.getMessageID(), message.getChatID());
     }
@@ -64,7 +87,7 @@ public class TelegramApi {
         if (!SafeReader.isValid(text)) return null;
 
         try (HttpConnector connector = new HttpConnector(buildUrl())){
-            TelegramRequest request = new TelegramRequest(text, repliedMessageID);
+            TelegramMessageRequest request = new TelegramMessageRequest(text, repliedMessageID);
             return connector.post(
                     "/sendMessage",
                     buildMessageParams(text, chatID != null ? chatID : defaultChatID),
@@ -73,8 +96,20 @@ public class TelegramApi {
         }
     }
 
-    public TelegramResponse getUpdates() {
-        TelegramResponse response = null;
+    public String reply(TelegramMessageRequest request, Long chatID) throws Exception {
+        if (request == null || request.isEmpty()) return null;
+
+        try (HttpConnector connector = new HttpConnector(buildUrl())){
+            return connector.post(
+                    "/sendMessage",
+                    buildMessageParams(chatID != null ? chatID : defaultChatID),
+                    TelegramRequestSerializer.serialize(request)
+            );
+        }
+    }
+
+    public TelegramMessageResponse getUpdates() {
+        TelegramMessageResponse response = null;
 
         try (HttpConnector connector = new HttpConnector(buildUrl())){
             String jsonResponse = connector.get("/getUpdates");
@@ -89,15 +124,15 @@ public class TelegramApi {
     }
 
     public List<TelegramMessage> getUnansweredMessages(ChatReplies chatReplies) throws Exception {
-        TelegramResponse response = getUpdates();
+        TelegramMessageResponse response = getUpdates();
         if (response == null || response.isEmpty()) return null;
 
         List<TelegramMessage> messages = getMessages(response);
-        List<TelegramMessage> citations = getCitationMessages(messages);
-        List<TelegramMessage> stickers = getStickers(messages);
+        List<TelegramMessage> unansweredMessages = filterUnanswered(messages);
+        List<TelegramMessage> stickers = getStickers(unansweredMessages);
         if (!stickers.isEmpty()) processStickers(stickers, chatReplies);
 
-        return filterUnanswered(citations);
+        return unansweredMessages;
     }
 
     public String processStickers(List<TelegramMessage> stickers, ChatReplies chatReplies) throws Exception {
@@ -123,14 +158,34 @@ public class TelegramApi {
     }
 
     private Set<Long> replyAll(List<TelegramMessage> messages, ChatReplies chatReplies) throws Exception {
+        if (messages == null || messages.isEmpty()) return new HashSet<>();
+
         Set<Long> repliedMessageIDs = new HashSet<>();
         for (TelegramMessage message : messages){
+            if (chatReplies.isMenuRequested(message.getText())){
+                sendMenu(message, repliedMessageIDs, chatReplies);
+                continue;
+            }
+
             String reply = message.isSticker() ? chatReplies.getCitationReply(message.getText(), botNickName) : chatReplies.getReply(message.getText());
             if (reply == null) continue;
+
             String jsonResponse = reply(reply, message);
             if (SafeReader.isValid(jsonResponse)) repliedMessageIDs.add(message.getMessageID());
         }
         return repliedMessageIDs;
+    }
+
+    private void sendMenu(TelegramMessage message, Set<Long> repliedMessageIDs, ChatReplies chatReplies) throws Exception {
+        TelegramMessageRequest messageRequest = chatReplies.getMenuReply(message);
+        String response = reply(messageRequest, message.getChatID());
+        if (response != null && !response.isEmpty()) repliedMessageIDs.add(message.getMessageID());
+    }
+
+    private String buildMessageParams(Long chatID){
+        return new UrlParamBuilder()
+                .add(TelegramApiParam.CHAT_ID, chatID)
+                .build();
     }
 
     private String buildMessageParams(String message, Long chatID) throws UnsupportedEncodingException {
@@ -140,7 +195,20 @@ public class TelegramApi {
                 .build();
     }
 
-    private List<TelegramMessage> getMessages(TelegramResponse response){
+    private String buildStickerParams(String fileID, Long chatID) {
+        return new UrlParamBuilder()
+                .add(TelegramApiParam.CHAT_ID, chatID)
+                .add(TelegramApiParam.STICKER, fileID)
+                .build();
+    }
+
+    private String buildStickerSetParams(String stickerSetCode){
+        return new UrlParamBuilder()
+                .add(TelegramApiParam.NAME, stickerSetCode)
+                .build();
+    }
+
+    private List<TelegramMessage> getMessages(TelegramMessageResponse response){
         return response.getResult().stream().map(res -> res.getMessage()).collect(Collectors.toList());
     }
 
