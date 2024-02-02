@@ -6,11 +6,10 @@ import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
-import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.text.DateFormat;
 import java.util.List;
 
 @Component
@@ -24,24 +23,24 @@ public class SheetExtractor {
     @Value("${google.sheets.chat}")
     private String chatSheetTitle;
 
-    public Settings getSettings(List<SheetData> sheets){
+    public DataSettings getSettings(List<SheetData> sheets){
         SheetData settingsSheet = getSheet(sheets, settingsSheetTitle);
-        return isValid(settingsSheet) ? new Settings(settingsSheet, sheets) : null;
+        return isValid(settingsSheet) ? new DataSettings(settingsSheet, sheets) : null;
     }
 
-    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, Settings settings) throws DateParserException {
+    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, DataSettings dataSettings) throws DateParserException {
         SheetData birthdaysSheet = getSheet(sheets, birthdaysSheetTitle);
-        return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, settings) : null;
+        return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, dataSettings) : null;
     }
 
-    public EventsSchedule getEvents(List<SheetData> sheets, Settings settings){
+    public EventsSchedule getEvents(List<SheetData> sheets, DataSettings dataSettings){
         SheetData eventsSheet = getSheet(sheets, eventsSheetTitle);
-        return isValid(eventsSheet) ? new EventsSchedule(eventsSheet, settings) : null;
+        return isValid(eventsSheet) ? new EventsSchedule(eventsSheet, dataSettings) : null;
     }
 
-    public ChatReplies getChatReplies(List<SheetData> sheets, Settings settings){
+    public ChatReplies getChatReplies(List<SheetData> sheets, DataSettings dataSettings){
         SheetData chatSheet = getSheet(sheets, chatSheetTitle);
-        return isValid(chatSheet) ? new ChatReplies(chatSheet, settings) : null;
+        return isValid(chatSheet) ? new ChatReplies(chatSheet, dataSettings) : null;
     }
 
     public boolean isExtracted(SheetData sheet, Action action){

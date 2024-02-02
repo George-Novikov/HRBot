@@ -33,6 +33,8 @@ public class Bootstrap implements CommandLineRunner {
         LOGGER.info("System timezone: {}", TimeZone.getDefault());
         LOGGER.info("System locale: {}", Locale.getDefault());
 
+        //TODO: check settings validity before running timers
+
         chatTimer.start();
         birthdaysTimer.start();
         eventsTimer.start();

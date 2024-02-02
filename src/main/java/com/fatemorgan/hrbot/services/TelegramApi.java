@@ -2,10 +2,10 @@ package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
-import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
 import com.fatemorgan.hrbot.model.telegram.request.TelegramMessageRequest;
+import com.fatemorgan.hrbot.model.telegram.response.TelegramInfoResponse;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessageResponse;
 import com.fatemorgan.hrbot.network.HttpConnector;
@@ -14,12 +14,12 @@ import com.fatemorgan.hrbot.storage.MessageStorage;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 @Component
 public class TelegramApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramApi.class);
-    private String botNickName;
     @Value("${telegram.url}")
     private String url;
     @Value("${telegram.bot-token}")
@@ -38,16 +37,26 @@ public class TelegramApi {
 
     private MessageStorage messageStorage;
 
-    public TelegramApi(MessageStorage messageStorage,
-                       @Qualifier("botNickName") String botNickName) {
+    public TelegramApi(MessageStorage messageStorage) {
         this.messageStorage = messageStorage;
-        this.botNickName = botNickName;
     }
 
     public String getBotInfo() throws Exception {
         try (HttpConnector connector = new HttpConnector(buildUrl())){
             return connector.get("/getMe", "");
         }
+    }
+
+    public TelegramInfoResponse getBotInfoResponse(){
+        TelegramInfoResponse infoResponse = null;
+
+        try {
+            infoResponse = TelegramResponseSerializer.deserializeInfo(getBotInfo());
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+        }
+
+        return infoResponse;
     }
 
     public String getAvailableChats(){
@@ -113,7 +122,7 @@ public class TelegramApi {
 
         try (HttpConnector connector = new HttpConnector(buildUrl())){
             String jsonResponse = connector.get("/getUpdates");
-            if (jsonResponse != null) response = TelegramResponseSerializer.deserialize(jsonResponse);
+            if (jsonResponse != null) response = TelegramResponseSerializer.deserializeMessages(jsonResponse);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
         }
@@ -167,7 +176,7 @@ public class TelegramApi {
                 continue;
             }
 
-            String reply = message.isSticker() ? chatReplies.getCitationReply(message.getText(), botNickName) : chatReplies.getReply(message.getText());
+            String reply = chatReplies.getReply(message.getText());
             if (reply == null) continue;
 
             String jsonResponse = reply(reply, message);
@@ -213,6 +222,11 @@ public class TelegramApi {
     }
 
     private List<TelegramMessage> getCitationMessages(List<TelegramMessage> messages){
+        TelegramInfoResponse infoResponse = getBotInfoResponse();
+        if (infoResponse == null || infoResponse.isEmpty()) return new ArrayList<>();
+
+        String botNickName = String.format("@%s", infoResponse.getResult().getUserName());
+
         return messages
                 .stream()
                 .filter(message -> message.isCitation(botNickName))

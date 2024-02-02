@@ -1,18 +1,15 @@
 package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.GlobalDataContainer;
-import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.constants.Action;
-import com.fatemorgan.hrbot.model.constants.BirthdaysMessage;
 import com.fatemorgan.hrbot.model.constants.EventsMessage;
 import com.fatemorgan.hrbot.model.constants.SystemMessage;
 import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
-import com.fatemorgan.hrbot.model.exceptions.BirthdaysException;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.exceptions.EventsException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
-import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.network.Responder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -45,18 +42,18 @@ public class EventsService {
         initGlobalContainer();
 
         EventsSchedule events = globalContainer.getEvents();
-        Settings settings = globalContainer.getSettings();
+        DataSettings dataSettings = globalContainer.getSettings();
 
-        return events.findNextEvents(settings.getDateParser());
+        return events.findNextEvents(dataSettings.getDateParser());
     }
 
-    public List<Event> getTomorrowEvents() throws IOException, SettingsException, DateParserException, EventsException {
+    public List<Event> getTodayEvents() throws IOException, SettingsException, DateParserException, EventsException {
         initGlobalContainer();
 
         EventsSchedule events = globalContainer.getEvents();
-        Settings settings = globalContainer.getSettings();
+        DataSettings dataSettings = globalContainer.getSettings();
 
-        return events.findTomorrowEvents(settings.getDateParser());
+        return events.findTodayEvents(dataSettings.getDateParser());
     }
 
     public Set<String> extractEventNames(List<Event> events){

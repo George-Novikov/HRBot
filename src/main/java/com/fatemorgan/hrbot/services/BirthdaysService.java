@@ -9,8 +9,8 @@ import com.fatemorgan.hrbot.model.constants.SystemMessage;
 import com.fatemorgan.hrbot.model.exceptions.BirthdaysException;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.model.settings.DateParser;
-import com.fatemorgan.hrbot.model.settings.Settings;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -38,9 +38,9 @@ public class BirthdaysService {
         initGlobalContainer();
 
         BirthdaysSchedule birthdays = globalContainer.getBirthdays();
-        Settings settings = globalContainer.getSettings();
+        DataSettings dataSettings = globalContainer.getSettings();
 
-        DateParser dateParser = settings.getDateParser();
+        DateParser dateParser = dataSettings.getDateParser();
         return birthdays.findNearestBirthday(dateParser);
     }
 
@@ -48,9 +48,9 @@ public class BirthdaysService {
         initGlobalContainer();
 
         BirthdaysSchedule birthdays = globalContainer.getBirthdays();
-        Settings settings = globalContainer.getSettings();
+        DataSettings dataSettings = globalContainer.getSettings();
 
-        DateParser dateParser = settings.getDateParser();
+        DateParser dateParser = dataSettings.getDateParser();
         return birthdays.findCurrentBirthday(dateParser);
     }
 

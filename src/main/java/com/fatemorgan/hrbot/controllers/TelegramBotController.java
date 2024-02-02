@@ -21,13 +21,23 @@ public class TelegramBotController {
         this.bot = bot;
     }
 
+    @GetMapping(path = "/info")
+    public ResponseEntity getBotName(){
+        try {
+            return Responder.sendOk(bot.getBotInfo());
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
+        }
+    }
+
     @GetMapping(path = "/messages/send")
     public ResponseEntity sendMessage(@RequestParam(value = "text", defaultValue = "") String text){
         try {
             return ResponseEntity.ok(bot.sendMessage(text));
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
-            return ResponseEntity.status(500).body(e.getMessage());
+            return  Responder.sendError(e);
         }
     }
 
@@ -75,10 +85,10 @@ public class TelegramBotController {
         }
     }
 
-    @GetMapping(path = "/events/getTomorrowEvent")
-    public ResponseEntity processTomorrowEvents(){
+    @GetMapping(path = "/events/today")
+    public ResponseEntity processTodayEvents(){
         try {
-            String response = bot.processTomorrowEvents();
+            String response = bot.processTodayEvents();
             return Responder.sendOk(response);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);

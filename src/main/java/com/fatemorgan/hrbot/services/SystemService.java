@@ -5,7 +5,7 @@ import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.constants.SystemMessage;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
-import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.tools.datetime.Today;
 import org.springframework.http.ResponseEntity;
@@ -27,17 +27,17 @@ public class SystemService {
     public ResponseEntity getSettings(boolean isFull) throws IOException, SettingsException, DateParserException {
         googleSheetsService.updateGlobalContainer(isFull ? Action.ALL : Action.SETTINGS_UPDATE);
 
-        Settings settings = globalContainer.getSettings();
-        if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
+        DataSettings dataSettings = globalContainer.getSettings();
+        if (dataSettings == null || dataSettings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
 
-        return Responder.sendOk(settings);
+        return Responder.sendOk(dataSettings);
     }
 
     public ResponseEntity getToday() throws IOException, SettingsException, DateParserException {
         googleSheetsService.updateGlobalContainer(Action.SETTINGS_UPDATE);
-        Settings settings = globalContainer.getSettings();
+        DataSettings dataSettings = globalContainer.getSettings();
 
-        if (settings == null || settings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
+        if (dataSettings == null || dataSettings.isEmpty()) Responder.sendError(SystemMessage.SETTINGS_LOADING_ERROR);
 
         return Responder.sendOk(Today.get());
     }

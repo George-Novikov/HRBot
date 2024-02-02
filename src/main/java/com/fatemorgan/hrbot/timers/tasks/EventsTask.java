@@ -20,7 +20,7 @@ public class EventsTask extends TimerTask {
     @Override
     public void run() {
         try {
-            bot.processTomorrowEvents();
+            bot.processTodayEvents();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
         }

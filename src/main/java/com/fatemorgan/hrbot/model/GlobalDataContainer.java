@@ -2,34 +2,33 @@ package com.fatemorgan.hrbot.model;
 
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
-import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
-import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 
 public class GlobalDataContainer {
-    private Settings settings;
+    private DataSettings dataSettings;
     private BirthdaysSchedule birthdays;
     private EventsSchedule events;
     private ChatReplies chatReplies;
 
     public GlobalDataContainer() {}
 
-    public GlobalDataContainer(Settings settings,
+    public GlobalDataContainer(DataSettings dataSettings,
                                BirthdaysSchedule birthdays,
                                EventsSchedule events,
                                ChatReplies chatReplies) {
-        this.settings = settings;
+        this.dataSettings = dataSettings;
         this.birthdays = birthdays;
         this.events = events;
         this.chatReplies = chatReplies;
     }
 
-    public Settings getSettings() {
-        return settings;
+    public DataSettings getSettings() {
+        return dataSettings;
     }
 
-    public void setSettings(Settings settings) {
-        this.settings = settings;
+    public void setSettings(DataSettings dataSettings) {
+        this.dataSettings = dataSettings;
     }
 
     public BirthdaysSchedule getBirthdays() {
@@ -56,18 +55,18 @@ public class GlobalDataContainer {
         this.chatReplies = chatReplies;
     }
 
-    public void load(Settings settings,
+    public void load(DataSettings dataSettings,
                      BirthdaysSchedule birthdays,
                      EventsSchedule events,
                      ChatReplies chatReplies) {
-        if (settings != null) this.settings = settings;
+        if (dataSettings != null) this.dataSettings = dataSettings;
         if (birthdays != null) this.birthdays = birthdays;
         if (events != null) this.events = events;
         if (chatReplies != null) this.chatReplies = chatReplies;
     }
 
     public boolean hasSettings(){
-        return this.settings != null && !this.settings.isEmpty();
+        return this.dataSettings != null && !this.dataSettings.isEmpty();
     }
 
     public boolean hasBirthdays(){

@@ -5,8 +5,8 @@ import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.model.settings.DateParser;
-import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.tools.comparators.PersonDateComparator;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import com.fatemorgan.hrbot.tools.datetime.Today;
@@ -21,11 +21,11 @@ public class BirthdaysSchedule {
     private String birthdayGreeting;
     private String nextBirthdayRequest;
     private List<Person> employees;
-    public BirthdaysSchedule(SheetData sheet, Settings settings) throws DateParserException {
+    public BirthdaysSchedule(SheetData sheet, DataSettings dataSettings) throws DateParserException {
         this.employees = new ArrayList<>();
-        this.birthdayGreeting = settings.getBirthdayGreeting();
-        this.nextBirthdayRequest = settings.getNextBirthdayRequest();
-        fillEmployees(sheet, settings);
+        this.birthdayGreeting = dataSettings.getBirthdayGreeting();
+        this.nextBirthdayRequest = dataSettings.getNextBirthdayRequest();
+        fillEmployees(sheet, dataSettings);
     }
 
     public String getBirthdayGreeting() {
@@ -95,12 +95,12 @@ public class BirthdaysSchedule {
                 .collect(Collectors.toList());
     }
 
-    private void fillEmployees(SheetData sheet, Settings settings) {
-        if (sheet.isEmpty() || settings.isEmpty()) return;
+    private void fillEmployees(SheetData sheet, DataSettings dataSettings) {
+        if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        int nameIndex = settings.getColumnIndex(SettingsAttribute.NAME);
-        int birthdayIndex = settings.getColumnIndex(SettingsAttribute.BIRTHDAY);
-        int nicknameIndex = settings.getColumnIndex(SettingsAttribute.NICKNAME);
+        int nameIndex = dataSettings.getColumnIndex(SettingsAttribute.NAME);
+        int birthdayIndex = dataSettings.getColumnIndex(SettingsAttribute.BIRTHDAY);
+        int nicknameIndex = dataSettings.getColumnIndex(SettingsAttribute.NICKNAME);
 
         //TODO: null check
 
@@ -111,7 +111,7 @@ public class BirthdaysSchedule {
             String birthday = getSafeValue(row, birthdayIndex);
             String nickname =  getSafeValue(row, nicknameIndex);
 
-            if (settings.isHeader(name) || settings.isHeader(birthday) || settings.isHeader(nickname)) continue;
+            if (dataSettings.isHeader(name) || dataSettings.isHeader(birthday) || dataSettings.isHeader(nickname)) continue;
 
             employees.add(new Person(name, birthday, nickname));
         }

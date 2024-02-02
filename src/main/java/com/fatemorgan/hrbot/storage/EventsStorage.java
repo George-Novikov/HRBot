@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Component
 public class EventsStorage {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageStorage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsStorage.class);
 
     private DateParser dateParser;
     private File eventsFile;

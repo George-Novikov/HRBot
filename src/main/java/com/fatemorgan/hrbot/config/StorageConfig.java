@@ -16,6 +16,7 @@ import java.util.*;
 public class StorageConfig {
     private static final String MANAGING_FILE_NAME = "storage.json";
     private static final String EVENTS_FILE_NAME = "events.json";
+    private static final String SETTINGS_FILE_NAME = "events.json";
     private static final String TIMESTAMP_PATTERN = "yyyyMMdd";
 
     @Bean
@@ -29,7 +30,7 @@ public class StorageConfig {
 
     @Bean
     @Qualifier("managementFile")
-    public File getManagementFile(@Qualifier("storageDateParser") DateParser dateParser) throws IOException {
+    public File getManagementFile() throws IOException {
         File managementFile = new File(MANAGING_FILE_NAME);
         FileManager.createOrBypass(managementFile);
         return managementFile;
@@ -37,9 +38,17 @@ public class StorageConfig {
 
     @Bean
     @Qualifier("eventsFile")
-    public File getEventsFile(@Qualifier("storageDateParser") DateParser dateParser) throws IOException {
+    public File getEventsFile() throws IOException {
         File eventsFile = new File(EVENTS_FILE_NAME);
         FileManager.createOrBypass(eventsFile);
         return eventsFile;
+    }
+
+    @Bean
+    @Qualifier("settingsFile")
+    public File getSettingsFile() throws IOException {
+        File settingsFile = new File(SETTINGS_FILE_NAME);
+        FileManager.createOrBypass(settingsFile);
+        return settingsFile;
     }
 }

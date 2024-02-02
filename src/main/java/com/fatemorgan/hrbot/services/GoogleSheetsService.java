@@ -3,6 +3,7 @@ package com.fatemorgan.hrbot.services;
 
 import com.fatemorgan.hrbot.model.GlobalDataContainer;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.tools.SheetExtractor;
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
@@ -10,7 +11,6 @@ import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.exceptions.SettingsException;
 import com.fatemorgan.hrbot.model.google.SheetData;
-import com.fatemorgan.hrbot.model.settings.Settings;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -51,14 +51,14 @@ public class GoogleSheetsService {
                 .collect(Collectors.toList());
         fillAllSheetsData(sheets, action);
 
-        Settings settings = extractor.getSettings(sheets);
-        if (settings == null) throw new SettingsException("Failed to load settings from Spreadsheets remote source");
+        DataSettings dataSettings = extractor.getSettings(sheets);
+        if (dataSettings == null) throw new SettingsException("Failed to load settings from Spreadsheets remote source");
 
-        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets, settings);
-        EventsSchedule events = extractor.getEvents(sheets, settings);
-        ChatReplies chatReplies = extractor.getChatReplies(sheets, settings);
+        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets, dataSettings);
+        EventsSchedule events = extractor.getEvents(sheets, dataSettings);
+        ChatReplies chatReplies = extractor.getChatReplies(sheets, dataSettings);
 
-        container.load(settings, birthdays, events, chatReplies);
+        container.load(dataSettings, birthdays, events, chatReplies);
     }
 
     private void fillAllSheetsData(List<SheetData> sheets, Action action) throws IOException {

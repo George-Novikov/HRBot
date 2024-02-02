@@ -3,7 +3,7 @@ package com.fatemorgan.hrbot.model.chat;
 import com.fatemorgan.hrbot.model.constants.Placeholder;
 import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
 import com.fatemorgan.hrbot.model.google.SheetData;
-import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.model.telegram.request.TelegramMessageRequest;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
 import com.fatemorgan.hrbot.tools.SafeReader;
@@ -16,12 +16,12 @@ public class ChatReplies {
     private List<ReplyScheme> replies;
     private List<ReplyScheme> stickerReplies;
     private List<ReplyScheme> menuReplies;
-    public ChatReplies(SheetData sheet, Settings settings){
-        this.nextBirthdayRequest = settings.getNextBirthdayRequest();
+    public ChatReplies(SheetData sheet, DataSettings dataSettings){
+        this.nextBirthdayRequest = dataSettings.getNextBirthdayRequest();
         this.replies = new ArrayList<>();
         this.stickerReplies = new ArrayList<>();
         this.menuReplies = new ArrayList<>();
-        fillReplies(sheet, settings);
+        fillReplies(sheet, dataSettings);
     }
 
     public String getNextBirthdayRequest() {
@@ -54,11 +54,11 @@ public class ChatReplies {
         return getReply(request);
     }
 
-    private void fillReplies(SheetData sheet, Settings settings){
-        if (sheet.isEmpty() || settings.isEmpty()) return;
+    private void fillReplies(SheetData sheet, DataSettings dataSettings){
+        if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        Integer requestIndex = settings.getColumnIndex(SettingsAttribute.REQUEST);
-        Integer replyIndex = settings.getColumnIndex(SettingsAttribute.REPLY);
+        Integer requestIndex = dataSettings.getColumnIndex(SettingsAttribute.REQUEST);
+        Integer replyIndex = dataSettings.getColumnIndex(SettingsAttribute.REPLY);
 
         if (requestIndex == null || replyIndex == null) return;
 
@@ -68,7 +68,7 @@ public class ChatReplies {
             String request = getSafeValue(row, requestIndex);
             String reply = getSafeValue(row, replyIndex);
 
-            if (settings.isHeader(request) || settings.isHeader(reply)) continue;
+            if (dataSettings.isHeader(request) || dataSettings.isHeader(reply)) continue;
 
             if (isStickerReply(reply)){
                 stickerReplies.add(new ReplyScheme(request, reply));

@@ -4,6 +4,7 @@ import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.events.Event;
 import com.fatemorgan.hrbot.model.exceptions.ChatException;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
+import com.fatemorgan.hrbot.model.telegram.response.TelegramInfoResponse;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
 import com.fatemorgan.hrbot.storage.EventsStorage;
 import com.fatemorgan.hrbot.storage.MessageStorage;
@@ -80,6 +81,10 @@ public class TelegramBotService {
         return api.processUnansweredMessages(unansweredMessages, chatReplies);
     }
 
+    public TelegramInfoResponse getBotInfo(){
+        return api.getBotInfoResponse();
+    }
+
     public String processNextBirthdays(TelegramMessage birthdayRequest) throws Exception {
         List<Person> nextBirthdays = birthdaysService.getNextBirthdays();
         for (Person person : nextBirthdays){
@@ -109,8 +114,8 @@ public class TelegramBotService {
         return greetings.toString();
     }
 
-    public String processTomorrowEvents() throws Exception {
-        List<Event> events = eventsService.getTomorrowEvents();
+    public String processTodayEvents() throws Exception {
+        List<Event> events = eventsService.getTodayEvents();
         if (events == null || events.isEmpty()) return new HashSet().toString();
 
         events = filterUnprocessedEvents(events);
