@@ -1,7 +1,7 @@
 package com.fatemorgan.hrbot.model.chat;
 
+import com.fatemorgan.hrbot.model.constants.ColumnName;
 import com.fatemorgan.hrbot.model.constants.Placeholder;
-import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.model.telegram.request.TelegramMessageRequest;
@@ -57,8 +57,8 @@ public class ChatReplies {
     private void fillReplies(SheetData sheet, DataSettings dataSettings){
         if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        Integer requestIndex = dataSettings.getColumnIndex(SettingsAttribute.REQUEST);
-        Integer replyIndex = dataSettings.getColumnIndex(SettingsAttribute.REPLY);
+        Integer requestIndex = dataSettings.getColumnIndex(ColumnName.REQUEST.name());
+        Integer replyIndex = dataSettings.getColumnIndex(ColumnName.REPLY.name());
 
         if (requestIndex == null || replyIndex == null) return;
 

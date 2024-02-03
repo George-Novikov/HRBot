@@ -2,20 +2,21 @@ package com.fatemorgan.hrbot.tools.datetime;
 
 
 import com.fatemorgan.hrbot.model.settings.DateParser;
+import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.*;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Today {
     public static Date get() {
-        ZoneId zoneId = ZoneId.systemDefault();
-        Instant instant = new Date().toInstant();
-        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
-        return Date.from(zonedDateTime.toInstant());
-    }
+        Settings settings = SettingsGlobalContainer.getInstance();
+        DateParser dateParser = settings.getDateParser();
 
-    public static Date get(DateParser dateParser) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        ZoneId zoneId = settings.getZoneId();
         Instant instant = new Date().toInstant();
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
 

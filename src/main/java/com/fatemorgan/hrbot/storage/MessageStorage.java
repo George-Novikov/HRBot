@@ -71,7 +71,7 @@ public class MessageStorage {
 
             updateStorageFiles();
             updateStorageMemory();
-            this.storageStateDate = Today.get(dateParser);
+            this.storageStateDate = Today.get();
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
         }
@@ -127,7 +127,7 @@ public class MessageStorage {
     
     private boolean isStorageStateUpToDate(){
         if (storageStateDate == null || !isStorageInit() || !isMessageIDBufferInit()) return false;
-        Date today = Today.get(dateParser);
+        Date today = Today.get();
         return storageStateDate.equals(today);
     }
 

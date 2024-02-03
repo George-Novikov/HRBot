@@ -1,14 +1,12 @@
 package com.fatemorgan.hrbot.controllers;
 
+import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.network.Responder;
 import com.fatemorgan.hrbot.services.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/system")
@@ -25,7 +23,17 @@ public class SystemController {
             @RequestParam(value = "isFull", defaultValue = "false") boolean isFull
     ){
         try {
-            return service.getSettings(isFull);
+            return service.getSettings();
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            return Responder.sendError(e);
+        }
+    }
+
+    @PostMapping("/settings")
+    public ResponseEntity saveSettings(@RequestBody Settings settings){
+        try {
+            return service.saveSettings(settings);
         } catch (Exception e){
             LOGGER.error(e.getMessage(), e);
             return Responder.sendError(e);
@@ -51,4 +59,6 @@ public class SystemController {
             return Responder.sendError(e);
         }
     }
+
+    //TODO: getAvailableTimezones();
 }

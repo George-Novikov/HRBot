@@ -1,6 +1,6 @@
 package com.fatemorgan.hrbot.services;
 
-import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.DataGlobalContainer;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.constants.BirthdaysMessage;
@@ -15,9 +15,9 @@ import java.io.IOException;
 @Service
 public class ChatService {
     private GoogleSheetsService googleSheetsService;
-    private GlobalDataContainer globalContainer;
+    private DataGlobalContainer globalContainer;
 
-    public ChatService(GoogleSheetsService googleSheetsService, GlobalDataContainer globalContainer) {
+    public ChatService(GoogleSheetsService googleSheetsService, DataGlobalContainer globalContainer) {
         this.googleSheetsService = googleSheetsService;
         this.globalContainer = globalContainer;
     }

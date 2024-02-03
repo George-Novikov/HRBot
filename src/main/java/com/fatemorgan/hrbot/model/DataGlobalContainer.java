@@ -5,15 +5,15 @@ import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
 
-public class GlobalDataContainer {
+public class DataGlobalContainer {
     private DataSettings dataSettings;
     private BirthdaysSchedule birthdays;
     private EventsSchedule events;
     private ChatReplies chatReplies;
 
-    public GlobalDataContainer() {}
+    public DataGlobalContainer() {}
 
-    public GlobalDataContainer(DataSettings dataSettings,
+    public DataGlobalContainer(DataSettings dataSettings,
                                BirthdaysSchedule birthdays,
                                EventsSchedule events,
                                ChatReplies chatReplies) {

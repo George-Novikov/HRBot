@@ -1,5 +1,7 @@
 package com.fatemorgan.hrbot.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.settings.DateParser;
 import com.fatemorgan.hrbot.storage.FileManager;
@@ -16,7 +18,7 @@ import java.util.*;
 public class StorageConfig {
     private static final String MANAGING_FILE_NAME = "storage.json";
     private static final String EVENTS_FILE_NAME = "events.json";
-    private static final String SETTINGS_FILE_NAME = "events.json";
+    private static final String SETTINGS_FILE_NAME = "settings.json";
     private static final String TIMESTAMP_PATTERN = "yyyyMMdd";
 
     @Bean
@@ -50,5 +52,13 @@ public class StorageConfig {
         File settingsFile = new File(SETTINGS_FILE_NAME);
         FileManager.createOrBypass(settingsFile);
         return settingsFile;
+    }
+
+    @Bean
+    @Qualifier("settingsObjectMapper")
+    public ObjectMapper settingsObjectMapper(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 }

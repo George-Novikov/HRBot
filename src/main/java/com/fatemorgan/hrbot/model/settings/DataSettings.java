@@ -3,7 +3,8 @@ package com.fatemorgan.hrbot.model.settings;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
+import com.fatemorgan.hrbot.model.constants.ColumnName;
+import com.fatemorgan.hrbot.model.constants.DataDefaults;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
@@ -14,27 +15,42 @@ import org.springframework.format.datetime.DateFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 
-@JsonIgnoreProperties(value = {"dateParser"})
+@JsonIgnoreProperties(value = {"dateParser", "isHeader", "isEmpty"}, ignoreUnknown = true)
 public class DataSettings {
+    private String timeOffset;
     private String locale;
     private String dateFormat;
     private String birthdayGreeting;
     private String nextBirthdayRequest;
     private DateParser dateParser;
-    private Map<String, String> columns;
+    private Map<String, String> columnNames;
     private Map<String, Integer> columnsOrder;
 
+    public DataSettings(){
+        this.columnNames = new HashMap();
+        this.columnsOrder = new HashMap<>();
+    };
     public DataSettings(SheetData sheet, List<SheetData> sheets){
         if (sheet.isEmpty()) return;
 
-        this.columns = new HashMap();
+        this.columnNames = new HashMap();
         this.columnsOrder = new HashMap<>();
 
         fill(sheet.getRows());
         fillColumnsOrder(sheets);
     }
 
+    public String getTimeOffset() {
+        if (this.timeOffset == null) return DataDefaults.DEFAULT_TIME_OFFSET;
+        return timeOffset;
+    }
+
+    public void setTimeOffset(String timeOffset) {
+        this.timeOffset = timeOffset;
+    }
+
     public String getLocale() {
+        if (this.locale == null) return DataDefaults.DEFAULT_LOCALE;
         return locale;
     }
 
@@ -43,10 +59,16 @@ public class DataSettings {
     }
 
     public String getDateFormat() {
+        if (this.dateFormat == null) return DataDefaults.DEFAULT_DATE_FORMAT;
         return dateFormat;
     }
 
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     public String getBirthdayGreeting() {
+        if (this.birthdayGreeting == null) return DataDefaults.DEFAULT_BIRTHDAY_GREETING;
         return birthdayGreeting;
     }
 
@@ -55,6 +77,7 @@ public class DataSettings {
     }
 
     public String getNextBirthdayRequest() {
+        if (this.nextBirthdayRequest == null) return DataDefaults.DEFAULT_NEXT_BIRTHDAY_REQUEST;
         return nextBirthdayRequest;
     }
 
@@ -66,8 +89,8 @@ public class DataSettings {
     public DateParser getDateParser() throws DateParserException {
         if (this.dateParser != null) return this.dateParser;
 
-        if (this.locale == null) this.locale = SettingsAttribute.DEFAULT_LOCALE;
-        if (this.dateFormat == null) this.dateFormat = SettingsAttribute.DEFAULT_DATE_FORMAT;
+        if (this.locale == null) this.locale = DataDefaults.DEFAULT_LOCALE;
+        if (this.dateFormat == null) this.dateFormat = DataDefaults.DEFAULT_DATE_FORMAT;
 
         this.dateParser = new DateParser(
                 new DateFormatter(this.dateFormat),
@@ -82,16 +105,15 @@ public class DataSettings {
         return SafeReader.parseDate(dateParser, dateString);
     }
 
-    public void setDateFormat(String dateFormat) {
-        this.dateFormat = dateFormat;
+    public Map<String, String> getColumnNames() {
+        if (columnNames == null || columnNames.size() < ColumnName.values().length){
+            fillDefaultColumns();
+        }
+        return columnNames;
     }
 
-    public Map<String, String> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(Map<String, String> columns) {
-        this.columns = columns;
+    public void setColumnNames(Map<String, String> columnNames) {
+        this.columnNames = columnNames;
     }
 
     public Map<String, Integer> getColumnsOrder() {
@@ -103,7 +125,7 @@ public class DataSettings {
     }
 
     public String getColumn(String name){
-        return this.columns != null ? columns.get(name) : null;
+        return this.columnNames != null ? columnNames.get(name) : null;
     }
 
     public Integer getColumnIndex(String name){
@@ -124,21 +146,21 @@ public class DataSettings {
 
     private void routeValueToField(String key, String value){
         switch (key){
-            case SettingsAttribute.LOCALE:
+            case DataDefaults.LOCALE_FIELD:
                 this.locale = value;
                 break;
-            case SettingsAttribute.DATE_FORMAT:
+            case DataDefaults.DATE_FORMAT_FIELD:
                 this.dateFormat = value;
                 break;
-            case SettingsAttribute.BIRTHDAY_GREETING:
+            case DataDefaults.BIRTHDAY_GREETING_FIELD:
                 this.birthdayGreeting = value;
                 break;
-            case SettingsAttribute.NEXT_BIRTHDAY_REQUEST:
+            case DataDefaults.NEXT_BIRTHDAY_REQUEST_FIELD:
                 this.nextBirthdayRequest = value;
                 break;
             default:
                 if (!value.isEmpty()){
-                    columns.put(key, value);
+                    columnNames.put(key, value);
                 }
                 break;
         }
@@ -161,15 +183,27 @@ public class DataSettings {
         }
     }
 
+    public void fillDefaultColumns(){
+        Arrays
+                .stream(ColumnName.values())
+                .forEach(column -> {
+                    if (columnNames == null || !columnNames.containsKey(column.name())){
+                        this.columnNames.put(column.name(), "");
+                    }
+                });
+    }
+
+    @JsonProperty("isHeader")
     public boolean isHeader(String value){
-        return this.columns.entrySet().stream().anyMatch(entry -> entry.getValue().equals(value));
+        return this.columnNames.entrySet().stream().anyMatch(entry -> entry.getValue().equals(value));
     }
 
     public String toJson() throws JsonProcessingException {
         return JsonMaker.serialize(this);
     }
 
+    @JsonProperty("isEmpty")
     public boolean isEmpty(){
-        return this.locale == null || this.dateFormat == null || this.columns == null || this.columnsOrder == null;
+        return this.locale == null || this.dateFormat == null || this.columnNames == null || this.columnsOrder == null;
     }
 }

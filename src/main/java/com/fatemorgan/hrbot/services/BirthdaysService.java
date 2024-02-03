@@ -1,6 +1,6 @@
 package com.fatemorgan.hrbot.services;
 
-import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.DataGlobalContainer;
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.birthdays.Person;
 import com.fatemorgan.hrbot.model.constants.Action;
@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @Service
 public class BirthdaysService {
     private GoogleSheetsService sheetsService;
-    private GlobalDataContainer globalContainer;
+    private DataGlobalContainer globalContainer;
 
     public BirthdaysService(GoogleSheetsService sheetsService,
-                               GlobalDataContainer globalContainer) {
+                               DataGlobalContainer globalContainer) {
         this.sheetsService = sheetsService;
         this.globalContainer = globalContainer;
     }
@@ -46,12 +46,8 @@ public class BirthdaysService {
 
     public List<Person> getCurrentBirthdays() throws BirthdaysException, IOException, SettingsException, DateParserException {
         initGlobalContainer();
-
         BirthdaysSchedule birthdays = globalContainer.getBirthdays();
-        DataSettings dataSettings = globalContainer.getSettings();
-
-        DateParser dateParser = dataSettings.getDateParser();
-        return birthdays.findCurrentBirthday(dateParser);
+        return birthdays.findCurrentBirthday();
     }
 
     public List<String> getCurrentBirthdayWishes(List<Person> currentBirthdays){

@@ -1,7 +1,7 @@
 package com.fatemorgan.hrbot.services;
 
 
-import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.DataGlobalContainer;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.tools.SheetExtractor;
@@ -32,11 +32,11 @@ public class GoogleSheetsService {
     private String range;
     private Sheets sheetsService;
     private SheetExtractor extractor;
-    private GlobalDataContainer container;
+    private DataGlobalContainer container;
 
     public GoogleSheetsService(Sheets sheetsService,
                                SheetExtractor extractor,
-                               GlobalDataContainer container) {
+                               DataGlobalContainer container) {
         this.sheetsService = sheetsService;
         this.extractor = extractor;
         this.container = container;

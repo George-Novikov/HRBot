@@ -1,6 +1,8 @@
 package com.fatemorgan.hrbot.tools.datetime;
 
 import com.fatemorgan.hrbot.model.settings.DateParser;
+import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import org.springframework.format.datetime.DateFormatter;
 
 import java.time.Instant;
@@ -12,15 +14,10 @@ import java.util.Locale;
 
 public class Yesterday {
     public static Date get() {
-        ZoneId zoneId = ZoneId.systemDefault();
-        Instant todayInstant = new Date().toInstant();
-        Instant yesterdayInstant = todayInstant.minus(1, ChronoUnit.DAYS);
-        ZonedDateTime zonedDateTime = yesterdayInstant.atZone(zoneId);
-        return Date.from(zonedDateTime.toInstant());
-    }
+        Settings settings = SettingsGlobalContainer.getInstance();
+        DateParser dateParser = settings.getDateParser();
 
-    public static Date get(DateParser dateParser) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        ZoneId zoneId = settings.getZoneId();
         Instant todayInstant = new Date().toInstant();
         Instant yesterdayInstant = todayInstant.minus(1, ChronoUnit.DAYS);
         ZonedDateTime zonedDateTime = yesterdayInstant.atZone(zoneId);

@@ -138,16 +138,8 @@ public class TelegramApi {
 
         List<TelegramMessage> messages = getMessages(response);
         List<TelegramMessage> unansweredMessages = filterUnanswered(messages);
-        List<TelegramMessage> stickers = getStickers(unansweredMessages);
-        if (!stickers.isEmpty()) processStickers(stickers, chatReplies);
 
         return unansweredMessages;
-    }
-
-    public String processStickers(List<TelegramMessage> stickers, ChatReplies chatReplies) throws Exception {
-        stickers = filterUnanswered(stickers);
-
-        return processUnansweredMessages(stickers, chatReplies);
     }
 
     public String processUnansweredMessages(List<TelegramMessage> unanswered, ChatReplies chatReplies) throws Exception {
@@ -230,13 +222,6 @@ public class TelegramApi {
         return messages
                 .stream()
                 .filter(message -> message.isCitation(botNickName))
-                .collect(Collectors.toList());
-    }
-
-    private List<TelegramMessage> getStickers(List<TelegramMessage> messages){
-        return messages
-                .stream()
-                .filter(message -> message.isSticker())
                 .collect(Collectors.toList());
     }
 

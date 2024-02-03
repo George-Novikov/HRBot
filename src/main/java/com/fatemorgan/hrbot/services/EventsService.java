@@ -1,6 +1,6 @@
 package com.fatemorgan.hrbot.services;
 
-import com.fatemorgan.hrbot.model.GlobalDataContainer;
+import com.fatemorgan.hrbot.model.DataGlobalContainer;
 import com.fatemorgan.hrbot.model.constants.Action;
 import com.fatemorgan.hrbot.model.constants.EventsMessage;
 import com.fatemorgan.hrbot.model.constants.SystemMessage;
@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @Service
 public class EventsService {
     private GoogleSheetsService googleSheetsService;
-    private GlobalDataContainer globalContainer;
+    private DataGlobalContainer globalContainer;
 
-    public EventsService(GoogleSheetsService googleSheetsService, GlobalDataContainer globalContainer) {
+    public EventsService(GoogleSheetsService googleSheetsService, DataGlobalContainer globalContainer) {
         this.googleSheetsService = googleSheetsService;
         this.globalContainer = globalContainer;
     }

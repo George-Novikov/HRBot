@@ -1,12 +1,13 @@
 package com.fatemorgan.hrbot.model.birthdays;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fatemorgan.hrbot.model.constants.SettingsAttribute;
+import com.fatemorgan.hrbot.model.constants.ColumnName;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
 import com.fatemorgan.hrbot.model.settings.DateParser;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import com.fatemorgan.hrbot.tools.comparators.PersonDateComparator;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import com.fatemorgan.hrbot.tools.datetime.Today;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BirthdaysSchedule {
+    private DateParser dateParser = SettingsGlobalContainer.getInstance().getDateParser();
     private String birthdayGreeting;
     private String nextBirthdayRequest;
     private List<Person> employees;
@@ -52,20 +54,20 @@ public class BirthdaysSchedule {
         this.employees = employees;
     }
 
-    public List<Person> findCurrentBirthday(DateParser dateParser){
+    public List<Person> findCurrentBirthday(){
         if (this.employees.isEmpty()) return this.employees;
-        Date today = Today.get(dateParser);
-        return filterByCurrentDate(today, dateParser);
+        Date today = Today.get();
+        return filterByCurrentDate(today);
     }
 
     public List<Person> findNearestBirthday(DateParser dateParser) {
         if (this.employees.isEmpty()) return this.employees;
-        Date today = Today.get(dateParser);
-        List<Person> nextBirthdays = filterByFutureDate(today, dateParser);
+        Date today = Today.get();
+        List<Person> nextBirthdays = filterByFutureDate(today);
         return nextBirthdays.isEmpty() ? nextBirthdays : findMostRelevant(nextBirthdays, dateParser);
     }
 
-    private List<Person> filterByFutureDate(Date date, DateParser dateParser){
+    private List<Person> filterByFutureDate(Date date){
         return this.employees
                 .stream()
                 .filter(person -> {
@@ -75,7 +77,7 @@ public class BirthdaysSchedule {
                 .collect(Collectors.toList());
     }
 
-    private List<Person> filterByCurrentDate(Date date, DateParser dateParser){
+    private List<Person> filterByCurrentDate(Date date){
         return this.employees
                 .stream()
                 .filter(person -> {
@@ -98,9 +100,9 @@ public class BirthdaysSchedule {
     private void fillEmployees(SheetData sheet, DataSettings dataSettings) {
         if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        int nameIndex = dataSettings.getColumnIndex(SettingsAttribute.NAME);
-        int birthdayIndex = dataSettings.getColumnIndex(SettingsAttribute.BIRTHDAY);
-        int nicknameIndex = dataSettings.getColumnIndex(SettingsAttribute.NICKNAME);
+        int nameIndex = dataSettings.getColumnIndex(ColumnName.NAME.name());
+        int birthdayIndex = dataSettings.getColumnIndex(ColumnName.BIRTHDAY.name());
+        int nicknameIndex = dataSettings.getColumnIndex(ColumnName.NICKNAME.name());
 
         //TODO: null check
 
