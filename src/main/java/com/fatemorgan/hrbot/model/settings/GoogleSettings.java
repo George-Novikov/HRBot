@@ -2,6 +2,7 @@ package com.fatemorgan.hrbot.model.settings;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fatemorgan.hrbot.model.constants.GoogleDefaults;
+import com.fatemorgan.hrbot.model.google.SheetData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleSettings {
@@ -103,4 +104,17 @@ public class GoogleSettings {
     public void setRangeToRead(String rangeToRead) {
         this.rangeToRead = rangeToRead;
     }
+
+    public boolean isBirthdaysSheet(SheetData sheet){
+        return this.getBirthdaysSheetName().equals(sheet.getTitle());
+    }
+
+    public boolean isEventsSheet(SheetData sheet){
+        return this.getEventsSheetName().equals(sheet.getTitle());
+    }
+
+    public boolean isChatRepliesSheet(SheetData sheet){
+        return this.getChatRepliesSheetName().equals(sheet.getTitle());
+    }
+
 }

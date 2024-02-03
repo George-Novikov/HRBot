@@ -7,6 +7,9 @@ import com.fatemorgan.hrbot.model.events.EventsSchedule;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
+import com.fatemorgan.hrbot.model.settings.GoogleSettings;
+import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,45 +17,36 @@ import java.util.List;
 
 @Component
 public class SheetExtractor {
-    @Value("${google.sheets.settings}")
-    private String settingsSheetTitle;
-    @Value("${google.sheets.birthdays}")
-    private String birthdaysSheetTitle;
-    @Value("${google.sheets.events}")
-    private String eventsSheetTitle;
-    @Value("${google.sheets.chat}")
-    private String chatSheetTitle;
 
-    public DataSettings getSettings(List<SheetData> sheets){
-        SheetData settingsSheet = getSheet(sheets, settingsSheetTitle);
-        return isValid(settingsSheet) ? new DataSettings(settingsSheet, sheets) : null;
+    public BirthdaysSchedule getBirthdays(List<SheetData> sheets) throws DateParserException {
+        Settings settings = SettingsGlobalContainer.getInstance();
+        GoogleSettings googleSettings = settings.getGoogleSettings();
+        SheetData birthdaysSheet = getSheet(sheets, googleSettings.getBirthdaysSheetName());
+        return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, settings.getDataSettings()) : null;
     }
 
-    public BirthdaysSchedule getBirthdays(List<SheetData> sheets, DataSettings dataSettings) throws DateParserException {
-        SheetData birthdaysSheet = getSheet(sheets, birthdaysSheetTitle);
-        return isValid(birthdaysSheet) ? new BirthdaysSchedule(birthdaysSheet, dataSettings) : null;
+    public EventsSchedule getEvents(List<SheetData> sheets){
+        Settings settings = SettingsGlobalContainer.getInstance();
+        GoogleSettings googleSettings = settings.getGoogleSettings();
+        SheetData eventsSheet = getSheet(sheets, googleSettings.getEventsSheetName());
+        return isValid(eventsSheet) ? new EventsSchedule(eventsSheet, settings.getDataSettings()) : null;
     }
 
-    public EventsSchedule getEvents(List<SheetData> sheets, DataSettings dataSettings){
-        SheetData eventsSheet = getSheet(sheets, eventsSheetTitle);
-        return isValid(eventsSheet) ? new EventsSchedule(eventsSheet, dataSettings) : null;
-    }
-
-    public ChatReplies getChatReplies(List<SheetData> sheets, DataSettings dataSettings){
-        SheetData chatSheet = getSheet(sheets, chatSheetTitle);
-        return isValid(chatSheet) ? new ChatReplies(chatSheet, dataSettings) : null;
+    public ChatReplies getChatReplies(List<SheetData> sheets){
+        Settings settings = SettingsGlobalContainer.getInstance();
+        GoogleSettings googleSettings = settings.getGoogleSettings();
+        SheetData chatSheet = getSheet(sheets, googleSettings.getChatRepliesSheetName());
+        return isValid(chatSheet) ? new ChatReplies(chatSheet, settings.getDataSettings()) : null;
     }
 
     public boolean isExtracted(SheetData sheet, Action action){
         switch (action){
-            case SETTINGS_UPDATE:
-                return isSettingsExtraction(sheet);
             case BIRTHDAYS_UPDATE:
-                return isBirthdaysExtraction(sheet) || isSettingsExtraction(sheet);
+                return isBirthdaysExtraction(sheet);
             case EVENTS_UPDATE:
-                return isEventsExtraction(sheet) || isSettingsExtraction(sheet);
+                return isEventsExtraction(sheet);
             case CHAT_UPDATE:
-                return isChatExtraction(sheet) || isSettingsExtraction(sheet);
+                return isChatExtraction(sheet);
             case ALL:
                 return true;
             default:
@@ -68,20 +62,16 @@ public class SheetExtractor {
                 .orElse(null);
     }
 
-    private boolean isSettingsExtraction(SheetData sheet){
-        return settingsSheetTitle.equals(sheet.getTitle());
-    }
-
     private boolean isBirthdaysExtraction(SheetData sheet){
-        return birthdaysSheetTitle.equals(sheet.getTitle());
+        return SettingsGlobalContainer.getInstance().getGoogleSettings().isBirthdaysSheet(sheet);
     }
 
     private boolean isEventsExtraction(SheetData sheet){
-        return eventsSheetTitle.equals(sheet.getTitle());
+        return SettingsGlobalContainer.getInstance().getGoogleSettings().isEventsSheet(sheet);
     }
 
     private boolean isChatExtraction(SheetData sheet){
-        return chatSheetTitle.equals(sheet.getTitle());
+        return SettingsGlobalContainer.getInstance().getGoogleSettings().isChatRepliesSheet(sheet);
     }
 
     private boolean isValid(SheetData sheet){

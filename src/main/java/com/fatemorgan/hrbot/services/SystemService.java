@@ -54,12 +54,14 @@ public class SystemService {
     }
 
     public ResponseEntity saveSettings(Settings settings){
+        settings.getDataSettings().setColumnsOrder(null);
         settingsStorage.saveSettings(settings);
         return Responder.sendOk(SystemMessage.SETTINGS_SAVE_SUCCESS);
     }
 
     public ResponseEntity saveDataSettings(DataSettings dataSettings){
         Settings settings = settingsStorage.getSettings();
+        dataSettings.setColumnsOrder(null);
         settings.setDataSettings(dataSettings);
         settingsStorage.saveSettings(settings);
         return Responder.sendOk(SystemMessage.SETTINGS_SAVE_SUCCESS);

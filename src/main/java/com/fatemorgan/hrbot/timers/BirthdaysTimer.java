@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.timers;
 
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import com.fatemorgan.hrbot.timers.tasks.BirthdaysTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,6 @@ import java.util.Timer;
 @Component
 public class BirthdaysTimer extends Timer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatTimer.class);
-    @Value("${telegram.timers.update-rate.birthdays}")
-    private Integer birthdaysUpdateRate;
 
     private BirthdaysTask birthdaysTask;
 
@@ -21,6 +20,7 @@ public class BirthdaysTimer extends Timer {
     }
 
     public void start() {
+        int birthdaysUpdateRate = SettingsGlobalContainer.getInstance().getTelegramSettings().getBirthdaysUpdateRate();
         long seconds = birthdaysUpdateRate * 1000;
         LOGGER.info("BirthdaysTimer has started with update rate: {} seconds", birthdaysUpdateRate);
         this.scheduleAtFixedRate(birthdaysTask, 0, seconds);

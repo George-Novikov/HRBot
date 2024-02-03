@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.util.Locale;
+import java.util.Map;
 
 @JsonIgnoreProperties(value = {"getDateParser", "getZoneId", "getLocale"})
 public class Settings {
@@ -70,5 +71,9 @@ public class Settings {
     public Locale getLocale(){
         String localeString = this.getDataSettings().getLocale();
         return LocaleParser.parse(localeString);
+    }
+
+    public Map<String, Integer> getColumnsOrder(){
+        return this.getDataSettings().getColumnsOrder();
     }
 }

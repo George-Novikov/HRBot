@@ -4,6 +4,9 @@ package com.fatemorgan.hrbot.services;
 import com.fatemorgan.hrbot.model.DataGlobalContainer;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.settings.DataSettings;
+import com.fatemorgan.hrbot.model.settings.GoogleSettings;
+import com.fatemorgan.hrbot.model.settings.Settings;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import com.fatemorgan.hrbot.tools.SheetExtractor;
 import com.fatemorgan.hrbot.model.birthdays.BirthdaysSchedule;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
@@ -26,10 +29,6 @@ import java.util.stream.Collectors;
 @Service
 public class GoogleSheetsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleSheetsService.class);
-    @Value("${google.spreadsheet-id}")
-    private String spreadsheetID;
-    @Value("${google.sheets.range-to-read}")
-    private String range;
     private Sheets sheetsService;
     private SheetExtractor extractor;
     private DataGlobalContainer container;
@@ -42,34 +41,45 @@ public class GoogleSheetsService {
         this.container = container;
     }
 
-    public void updateGlobalContainer(Action action) throws IOException, SettingsException, DateParserException {
+    public void updateGlobalContainer(Action action) throws IOException, DateParserException {
+
+        /* Any type of settings can't be null */
+        Settings settings = SettingsGlobalContainer.getInstance();
+        GoogleSettings googleSettings = settings.getGoogleSettings();
+        DataSettings dataSettings = settings.getDataSettings();
+
+        //TODO: validate settings
+
+        String spreadsheetID = googleSettings.getSpreadsheetID();
+        String range = googleSettings.getRangeToRead();
+        if (spreadsheetID == null || range == null) return;
+
         Spreadsheet spreadsheet = sheetsService.spreadsheets().get(spreadsheetID).execute();
 
         List<SheetData> sheets = spreadsheet.getSheets()
                 .stream()
                 .map(sheet -> new SheetData(sheet, range))
                 .collect(Collectors.toList());
-        fillAllSheetsData(sheets, action);
+        fillAllSheetsData(sheets, action, spreadsheetID);
 
-        DataSettings dataSettings = extractor.getSettings(sheets);
-        if (dataSettings == null) throw new SettingsException("Failed to load settings from Spreadsheets remote source");
+        dataSettings.fillColumnsOrder(sheets);
 
-        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets, dataSettings);
-        EventsSchedule events = extractor.getEvents(sheets, dataSettings);
-        ChatReplies chatReplies = extractor.getChatReplies(sheets, dataSettings);
+        BirthdaysSchedule birthdays = extractor.getBirthdays(sheets);
+        EventsSchedule events = extractor.getEvents(sheets);
+        ChatReplies chatReplies = extractor.getChatReplies(sheets);
 
         container.load(dataSettings, birthdays, events, chatReplies);
     }
 
-    private void fillAllSheetsData(List<SheetData> sheets, Action action) throws IOException {
+    private void fillAllSheetsData(List<SheetData> sheets, Action action, String spreadsheetID) throws IOException {
         for (SheetData sheet : sheets){
             if (extractor.isExtracted(sheet, action)){
-                getSheetData(sheet);
+                getSheetData(sheet, spreadsheetID);
             }
         }
     }
 
-    private void getSheetData(SheetData sheet) throws IOException {
+    private void getSheetData(SheetData sheet, String spreadsheetID) throws IOException {
         ValueRange valueRange = sheetsService
                 .spreadsheets()
                 .values()

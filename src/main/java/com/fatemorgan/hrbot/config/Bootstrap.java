@@ -41,6 +41,7 @@ public class Bootstrap implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         Settings settings = settingsStorage.getSettings();
+        SettingsGlobalContainer.setInstance(settings);
 
         LOGGER.info("Current timezone: {}", settings.getZoneId());
         LOGGER.info("Current locale: {}", settings.getLocale());

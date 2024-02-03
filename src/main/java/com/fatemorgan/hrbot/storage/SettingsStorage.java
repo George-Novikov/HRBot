@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Map;
 
 @Component
 public class SettingsStorage {
@@ -27,6 +28,8 @@ public class SettingsStorage {
         if (settings == null) return;
 
         try {
+            Map<String, Integer> columnsOrder = getSettings().getColumnsOrder();
+
             SettingsGlobalContainer.setInstance(settings);
             String settingsJson = serializer.serialize(settings);
             FileManager.write(settingsFile, settingsJson);

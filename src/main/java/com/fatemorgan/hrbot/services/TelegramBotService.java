@@ -25,13 +25,6 @@ import static com.fatemorgan.hrbot.model.constants.ChatMessage.EMPTY_CHAT_REPLIE
 @Service
 public class TelegramBotService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotService.class);
-    @Value("${telegram.url}")
-    private String url;
-    @Value("${telegram.bot-token}")
-    private String botToken;
-    @Value("${telegram.chat-id}")
-    private Long chatID;
-
     private TelegramApi api;
     private ChatService chatService;
     private BirthdaysService birthdaysService;

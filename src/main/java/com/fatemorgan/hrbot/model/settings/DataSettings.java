@@ -117,6 +117,7 @@ public class DataSettings {
     }
 
     public Map<String, Integer> getColumnsOrder() {
+        if (this.columnsOrder == null) this.columnsOrder = new HashMap<>();
         return columnsOrder;
     }
 
@@ -132,6 +133,22 @@ public class DataSettings {
         if (this.columnsOrder == null) return null;
         String columnName = getColumn(name);
         return columnName != null ? this.columnsOrder.get(columnName) : null;
+    }
+    public void fillColumnsOrder(List<SheetData> sheets){
+        for (SheetData sheet : sheets){
+            if (sheet.isEmpty()) continue;
+
+            List<String> headerRow = sheet.getRows().get(0);
+
+            IntStream
+                    .range(0, headerRow.size())
+                    .forEach(index -> {
+                        this.columnsOrder.put(
+                                headerRow.get(index),
+                                index
+                        );
+                    });
+        }
     }
 
     private void fill(List<List<String>> rows){
@@ -166,24 +183,7 @@ public class DataSettings {
         }
     }
 
-    private void fillColumnsOrder(List<SheetData> sheets){
-        for (SheetData sheet : sheets){
-            if (sheet.isEmpty()) continue;
-
-            List<String> headerRow = sheet.getRows().get(0);
-
-            IntStream
-                    .range(0, headerRow.size())
-                    .forEach(index -> {
-                        this.columnsOrder.put(
-                                headerRow.get(index),
-                                index
-                        );
-                    });
-        }
-    }
-
-    public void fillDefaultColumns(){
+    private void fillDefaultColumns(){
         Arrays
                 .stream(ColumnName.values())
                 .forEach(column -> {

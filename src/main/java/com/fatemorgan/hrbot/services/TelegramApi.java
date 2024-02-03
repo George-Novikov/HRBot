@@ -4,6 +4,8 @@ import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.constants.TelegramApiParam;
 import com.fatemorgan.hrbot.model.serializers.TelegramRequestSerializer;
 import com.fatemorgan.hrbot.model.serializers.TelegramResponseSerializer;
+import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
+import com.fatemorgan.hrbot.model.settings.TelegramSettings;
 import com.fatemorgan.hrbot.model.telegram.request.TelegramMessageRequest;
 import com.fatemorgan.hrbot.model.telegram.response.TelegramInfoResponse;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessage;
@@ -28,10 +30,6 @@ import java.util.stream.Collectors;
 @Component
 public class TelegramApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramApi.class);
-    @Value("${telegram.url}")
-    private String url;
-    @Value("${telegram.bot-token}")
-    private String botToken;
     @Value("${telegram.chat-id}")
     private Long defaultChatID;
 
@@ -230,7 +228,13 @@ public class TelegramApi {
     }
 
     private String buildUrl(){
-        return String.format("%s%s", url, botToken);
+        TelegramSettings telegramSettings = SettingsGlobalContainer.getInstance().getTelegramSettings();
+        //TODO: validate settings
+        return String.format(
+                "%s%s",
+                telegramSettings.getApiUrl(),
+                telegramSettings.getBotToken()
+        );
     }
 
     private boolean isAnswered(TelegramMessage message){
