@@ -100,11 +100,11 @@ public class BirthdaysSchedule {
     private void fillEmployees(SheetData sheet, DataSettings dataSettings) {
         if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        int nameIndex = dataSettings.getColumnIndex(ColumnName.NAME.name());
-        int birthdayIndex = dataSettings.getColumnIndex(ColumnName.BIRTHDAY.name());
-        int nicknameIndex = dataSettings.getColumnIndex(ColumnName.NICKNAME.name());
+        Integer nameIndex = dataSettings.getColumnIndex(ColumnName.NAME.name());
+        Integer birthdayIndex = dataSettings.getColumnIndex(ColumnName.BIRTHDAY.name());
+        Integer nicknameIndex = dataSettings.getColumnIndex(ColumnName.NICKNAME.name());
 
-        //TODO: null check
+        if (nameIndex == null || birthdayIndex == null || nicknameIndex == null) return;
 
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;

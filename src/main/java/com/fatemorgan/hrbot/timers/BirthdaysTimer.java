@@ -19,10 +19,13 @@ public class BirthdaysTimer extends Timer {
         this.birthdaysTask = birthdaysTask;
     }
 
-    public void start() {
+    public String start() {
         int birthdaysUpdateRate = SettingsGlobalContainer.getInstance().getTelegramSettings().getBirthdaysUpdateRate();
         long seconds = birthdaysUpdateRate * 1000;
-        LOGGER.info("BirthdaysTimer has started with update rate: {} seconds", birthdaysUpdateRate);
         this.scheduleAtFixedRate(birthdaysTask, 0, seconds);
+
+        String message = String.format("BirthdaysTimer has started with update rate: %s seconds", birthdaysUpdateRate);
+        LOGGER.info(message);
+        return message;
     }
 }

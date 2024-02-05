@@ -5,6 +5,7 @@ import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import org.springframework.format.datetime.DateFormatter;
 
+import javax.print.attribute.SetOfIntegerSyntax;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -28,7 +29,9 @@ public class Yesterday {
     }
 
     public static String getString(DateParser dateParser) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        Settings settings = SettingsGlobalContainer.getInstance();
+
+        ZoneId zoneId = settings.getZoneId();
         Instant todayInstant = new Date().toInstant();
         Instant yesterdayInstant = todayInstant.minus(1, ChronoUnit.DAYS);
         ZonedDateTime zonedDateTime = yesterdayInstant.atZone(zoneId);

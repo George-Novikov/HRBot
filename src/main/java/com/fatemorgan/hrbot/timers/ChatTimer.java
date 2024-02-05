@@ -19,10 +19,13 @@ public class ChatTimer extends Timer {
         this.chatTask = chatTask;
     }
 
-    public void start(){
+    public String start(){
         int chatUpdateRate = SettingsGlobalContainer.getInstance().getTelegramSettings().getChatUpdateRate();
         long seconds = chatUpdateRate * 1000;
-        LOGGER.info("ChatTimer has started with update rate: {} seconds", chatUpdateRate);
         this.scheduleAtFixedRate(chatTask, 0, seconds);
+
+        String message = String.format("ChatTimer has started with update rate: %s seconds", chatUpdateRate);
+        LOGGER.info(message);
+        return message;
     }
 }

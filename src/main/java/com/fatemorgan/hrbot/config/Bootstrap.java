@@ -3,6 +3,7 @@ package com.fatemorgan.hrbot.config;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
 import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
+import com.fatemorgan.hrbot.services.TimersService;
 import com.fatemorgan.hrbot.storage.SettingsStorage;
 import com.fatemorgan.hrbot.timers.BirthdaysTimer;
 import com.fatemorgan.hrbot.timers.ChatTimer;
@@ -24,18 +25,12 @@ public class Bootstrap implements CommandLineRunner {
 
     private SettingsStorage settingsStorage;
 
-    private ChatTimer chatTimer;
-    private BirthdaysTimer birthdaysTimer;
-    private EventsTimer eventsTimer;
+    private TimersService timersService;
 
     public Bootstrap(SettingsStorage settingsStorage,
-                     ChatTimer chatTimer,
-                     BirthdaysTimer birthdaysTimer,
-                     EventsTimer eventsTimer) {
+                     TimersService timersService) {
         this.settingsStorage = settingsStorage;
-        this.chatTimer = chatTimer;
-        this.birthdaysTimer = birthdaysTimer;
-        this.eventsTimer = eventsTimer;
+        this.timersService = timersService;
     }
 
     @Override
@@ -43,14 +38,15 @@ public class Bootstrap implements CommandLineRunner {
         Settings settings = settingsStorage.getSettings();
         SettingsGlobalContainer.setInstance(settings);
 
-        LOGGER.info("Current timezone: {}", settings.getZoneId());
-        LOGGER.info("Current locale: {}", settings.getLocale());
-        LOGGER.info("Today is {}", new Date().toInstant().atZone(settings.getZoneId()));
+        //TODO: check settings validity before running anything else
 
-        //TODO: check settings validity before running timers
+        ZoneId zoneId = settings.getZoneId();
+        Locale locale = settings.getLocale();
 
-        chatTimer.start();
-        birthdaysTimer.start();
-        eventsTimer.start();
+        LOGGER.info("Current timezone: {}", zoneId);
+        LOGGER.info("Current locale: {}", locale);
+        LOGGER.info("Today is {}", new Date().toInstant().atZone(zoneId));
+
+        timersService.startAllJobs();
     }
 }

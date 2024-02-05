@@ -26,7 +26,9 @@ public class Today {
     }
 
     public static String getString(DateParser dateParser) {
-        ZoneId zoneId = ZoneId.systemDefault();
+        Settings settings = SettingsGlobalContainer.getInstance();
+
+        ZoneId zoneId = settings.getZoneId();
         Instant instant = new Date().toInstant();
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
 

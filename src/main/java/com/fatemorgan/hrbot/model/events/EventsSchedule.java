@@ -80,10 +80,10 @@ public class EventsSchedule {
     private void fillEvents(SheetData sheet, DataSettings dataSettings){
         if (sheet.isEmpty() || dataSettings.isEmpty()) return;
 
-        int dateIndex = dataSettings.getColumnIndex(ColumnName.EVENT_DATE.name());
-        int announcementIndex = dataSettings.getColumnIndex(ColumnName.ANNOUNCEMENT.name());
+        Integer dateIndex = dataSettings.getColumnIndex(ColumnName.EVENT_DATE.name());
+        Integer announcementIndex = dataSettings.getColumnIndex(ColumnName.ANNOUNCEMENT.name());
 
-        //TODO: null check
+        if (dateIndex == null || announcementIndex == null) return;
 
         for (List<String> row : sheet.getRows()){
             if (row.isEmpty()) continue;

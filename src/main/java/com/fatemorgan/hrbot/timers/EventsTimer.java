@@ -19,11 +19,13 @@ public class EventsTimer extends Timer {
         this.eventsTask = eventsTask;
     }
 
-    public void start() {
+    public String start() {
         int eventsUpdateRate = SettingsGlobalContainer.getInstance().getTelegramSettings().getEventsUpdateRate();
-        long delay = 5 * 1000;
         long seconds = eventsUpdateRate * 1000;
-        LOGGER.info("EventsTimer has started with update rate: {} seconds", eventsUpdateRate);
-        this.scheduleAtFixedRate(eventsTask, delay, seconds);
+        this.scheduleAtFixedRate(eventsTask, 0, seconds);
+
+        String message = String.format("EventsTimer has started with update rate: %s seconds", eventsUpdateRate);
+        LOGGER.info(message);
+        return message;
     }
 }

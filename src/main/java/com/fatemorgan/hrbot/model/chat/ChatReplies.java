@@ -143,6 +143,7 @@ public class ChatReplies {
 
     private boolean isMenuReply(String text){
         if (text == null) return false;
+        //TODO: replace it with simpler JSON array pattern?
         return text.contains(Placeholder.MENU);
     }
 }
