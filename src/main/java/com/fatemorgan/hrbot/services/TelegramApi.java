@@ -130,7 +130,7 @@ public class TelegramApi {
         return response;
     }
 
-    public List<TelegramMessage> getUnansweredMessages(ChatReplies chatReplies) throws Exception {
+    public List<TelegramMessage> getUnansweredMessages() throws Exception {
         TelegramMessageResponse response = getUpdates();
         if (response == null || response.isEmpty()) return null;
 
@@ -148,7 +148,7 @@ public class TelegramApi {
     }
 
     public String replyUnanswered(ChatReplies chatReplies) throws Exception {
-        List<TelegramMessage> unanswered = getUnansweredMessages(chatReplies);
+        List<TelegramMessage> unanswered = getUnansweredMessages();
 
         Set<Long> repliedMessageIDs = replyAll(unanswered, chatReplies);
         messageStorage.saveReplies(repliedMessageIDs);

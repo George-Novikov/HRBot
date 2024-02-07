@@ -7,6 +7,7 @@ build/
 *.yml
 *.json
 /tokens
+*.log
 
 ### STS ###
 .apt_generated

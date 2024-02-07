@@ -10,6 +10,7 @@ import com.fatemorgan.hrbot.storage.EventsStorage;
 import com.fatemorgan.hrbot.storage.MessageStorage;
 import com.fatemorgan.hrbot.model.chat.ChatReplies;
 import com.fatemorgan.hrbot.model.telegram.response.messages.TelegramMessageResponse;
+import com.fatemorgan.hrbot.tools.SafeReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,10 +65,12 @@ public class TelegramBotService {
     }
 
     public String replyUnanswered() throws Exception {
+        List<TelegramMessage> unansweredMessages = api.getUnansweredMessages();
+        if (!SafeReader.isValid(unansweredMessages)) return "[]";
+
         ChatReplies chatReplies = chatService.getChatReplies();
         if (chatReplies == null || chatReplies.isEmpty()) throw new ChatException(EMPTY_CHAT_REPLIES);
 
-        List<TelegramMessage> unansweredMessages = api.getUnansweredMessages(chatReplies);
         TelegramMessage birthdayRequest = chatReplies.extractBirthdayRequest(unansweredMessages);
         if (birthdayRequest != null) processNextBirthdays(birthdayRequest);
 

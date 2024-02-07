@@ -25,7 +25,7 @@ public class DateParser {
 
     public Date parse(String stringDate) {
         try {
-            return dateFormatter.parse(stringDate, locale);
+            return dateFormatter.parse(stringDate.toUpperCase(), locale);
         } catch (Exception e){
             return new Date();
         }
