@@ -76,4 +76,8 @@ public class Settings {
     public Map<String, Integer> getColumnsOrder(){
         return this.getDataSettings().getColumnsOrder();
     }
+
+    public boolean isWorkingTime(){
+        return this.getDataSettings().isWorkingTime();
+    }
 }

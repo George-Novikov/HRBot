@@ -1,6 +1,6 @@
 package com.fatemorgan.hrbot.model.settings;
 
-import com.fatemorgan.hrbot.model.constants.DataDefaults;
+import com.fatemorgan.hrbot.model.constants.DefaultDataSettings;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.tools.LocaleParser;
 import org.springframework.format.datetime.DateFormatter;
@@ -13,8 +13,8 @@ public class DateParser {
     private Locale locale;
 
     public DateParser(){
-        this.dateFormatter = new DateFormatter(DataDefaults.DEFAULT_DATE_FORMAT);
-        this.locale = LocaleParser.parse(DataDefaults.DEFAULT_LOCALE);
+        this.dateFormatter = new DateFormatter(DefaultDataSettings.DEFAULT_DATE_FORMAT);
+        this.locale = LocaleParser.parse(DefaultDataSettings.DEFAULT_LOCALE);
     }
 
     public DateParser(DateFormatter dateFormatter, Locale locale) throws DateParserException {

@@ -1,5 +1,6 @@
 package com.fatemorgan.hrbot.timers;
 
+import com.fatemorgan.hrbot.model.settings.Settings;
 import com.fatemorgan.hrbot.model.settings.SettingsGlobalContainer;
 import com.fatemorgan.hrbot.timers.tasks.BirthdaysTask;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalTime;
 import java.util.Timer;
 
 @Component

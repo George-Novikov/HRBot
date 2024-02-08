@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fatemorgan.hrbot.model.constants.ColumnName;
-import com.fatemorgan.hrbot.model.constants.DataDefaults;
+import com.fatemorgan.hrbot.model.constants.DefaultDataSettings;
 import com.fatemorgan.hrbot.model.exceptions.DateParserException;
 import com.fatemorgan.hrbot.model.google.SheetData;
 import com.fatemorgan.hrbot.model.serializers.JsonMaker;
@@ -12,6 +12,7 @@ import com.fatemorgan.hrbot.tools.LocaleParser;
 import com.fatemorgan.hrbot.tools.SafeReader;
 import org.springframework.format.datetime.DateFormatter;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -20,6 +21,7 @@ public class DataSettings {
     private String timeOffset;
     private String locale;
     private String dateFormat;
+    private String workingTimeRange;
     private String birthdayGreeting;
     private String nextBirthdayRequest;
     private DateParser dateParser;
@@ -30,18 +32,9 @@ public class DataSettings {
         this.columnNames = new HashMap();
         this.columnsOrder = new HashMap<>();
     };
-    public DataSettings(SheetData sheet, List<SheetData> sheets){
-        if (sheet.isEmpty()) return;
-
-        this.columnNames = new HashMap();
-        this.columnsOrder = new HashMap<>();
-
-        fill(sheet.getRows());
-        fillColumnsOrder(sheets);
-    }
 
     public String getTimeOffset() {
-        if (this.timeOffset == null) return DataDefaults.DEFAULT_TIME_OFFSET;
+        if (this.timeOffset == null) return DefaultDataSettings.DEFAULT_TIME_OFFSET;
         return timeOffset;
     }
 
@@ -50,7 +43,7 @@ public class DataSettings {
     }
 
     public String getLocale() {
-        if (this.locale == null) return DataDefaults.DEFAULT_LOCALE;
+        if (this.locale == null) return DefaultDataSettings.DEFAULT_LOCALE;
         return locale;
     }
 
@@ -59,7 +52,7 @@ public class DataSettings {
     }
 
     public String getDateFormat() {
-        if (this.dateFormat == null) return DataDefaults.DEFAULT_DATE_FORMAT;
+        if (this.dateFormat == null) return DefaultDataSettings.DEFAULT_DATE_FORMAT;
         return dateFormat;
     }
 
@@ -67,8 +60,17 @@ public class DataSettings {
         this.dateFormat = dateFormat;
     }
 
+    public String getWorkingTimeRange() {
+        if (this.workingTimeRange == null) return DefaultDataSettings.DEFAULT_WORKING_TIME_RANGE;
+        return workingTimeRange;
+    }
+
+    public void setWorkingTimeRange(String workingTimeRange) {
+        this.workingTimeRange = workingTimeRange;
+    }
+
     public String getBirthdayGreeting() {
-        if (this.birthdayGreeting == null) return DataDefaults.DEFAULT_BIRTHDAY_GREETING;
+        if (this.birthdayGreeting == null) return DefaultDataSettings.DEFAULT_BIRTHDAY_GREETING;
         return birthdayGreeting;
     }
 
@@ -77,7 +79,7 @@ public class DataSettings {
     }
 
     public String getNextBirthdayRequest() {
-        if (this.nextBirthdayRequest == null) return DataDefaults.DEFAULT_NEXT_BIRTHDAY_REQUEST;
+        if (this.nextBirthdayRequest == null) return DefaultDataSettings.DEFAULT_NEXT_BIRTHDAY_REQUEST;
         return nextBirthdayRequest;
     }
 
@@ -89,8 +91,8 @@ public class DataSettings {
     public DateParser getDateParser() throws DateParserException {
         if (this.dateParser != null) return this.dateParser;
 
-        if (this.locale == null) this.locale = DataDefaults.DEFAULT_LOCALE;
-        if (this.dateFormat == null) this.dateFormat = DataDefaults.DEFAULT_DATE_FORMAT;
+        if (this.locale == null) this.locale = DefaultDataSettings.DEFAULT_LOCALE;
+        if (this.dateFormat == null) this.dateFormat = DefaultDataSettings.DEFAULT_DATE_FORMAT;
 
         this.dateParser = new DateParser(
                 new DateFormatter(this.dateFormat),
@@ -151,38 +153,6 @@ public class DataSettings {
         }
     }
 
-    private void fill(List<List<String>> rows){
-        rows
-                .stream()
-                .forEach(row -> {
-                    if (row.size() >= 2){
-                        routeValueToField(row.get(0), row.get(1));
-                    }
-                });
-    }
-
-    private void routeValueToField(String key, String value){
-        switch (key){
-            case DataDefaults.LOCALE_FIELD:
-                this.locale = value;
-                break;
-            case DataDefaults.DATE_FORMAT_FIELD:
-                this.dateFormat = value;
-                break;
-            case DataDefaults.BIRTHDAY_GREETING_FIELD:
-                this.birthdayGreeting = value;
-                break;
-            case DataDefaults.NEXT_BIRTHDAY_REQUEST_FIELD:
-                this.nextBirthdayRequest = value;
-                break;
-            default:
-                if (!value.isEmpty()){
-                    columnNames.put(key, value);
-                }
-                break;
-        }
-    }
-
     private void fillDefaultColumns(){
         Arrays
                 .stream(ColumnName.values())
@@ -193,13 +163,27 @@ public class DataSettings {
                 });
     }
 
+    public String toJson() throws JsonProcessingException {
+        return JsonMaker.serialize(this);
+    }
+
+    public boolean isWorkingTime(){
+        try {
+            String[] timeRange = this.getWorkingTimeRange().split("-");
+            if (timeRange.length < 2) return false;
+
+            LocalTime start = LocalTime.parse(timeRange[0]);
+            LocalTime end = LocalTime.parse(timeRange[1]);
+
+            return LocalTime.now().isAfter(start) && LocalTime.now().isBefore(end);
+        } catch (Exception e){
+            return false;
+        }
+    }
+
     @JsonProperty("isHeader")
     public boolean isHeader(String value){
         return this.columnNames.entrySet().stream().anyMatch(entry -> entry.getValue().equals(value));
-    }
-
-    public String toJson() throws JsonProcessingException {
-        return JsonMaker.serialize(this);
     }
 
     @JsonProperty("isEmpty")
