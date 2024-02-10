@@ -25,6 +25,15 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.runtimeClasspath.files.collect {it.getName()}.join(' '),
+                'Main-Class': 'com.fatemorgan.hrbot.HrBotApplication'
+        )
+    }
 }
+
+//tasks.named('test') {
+//    useJUnitPlatform()
+//}
